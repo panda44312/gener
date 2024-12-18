@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Electron CI
 
 on:
   push:
@@ -9,12 +9,11 @@ on:
 jobs:
   build:
 
-    runs-on: windows-latest  # 设置运行环境为 Windows（更改自 ubuntu-latest）
+    runs-on: windows-latest  # 设置运行环境为 Windows
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]  # 设置要测试的 Node.js 版本
-        # 查看支持的 Node.js 版本发布计划：https://nodejs.org/en/about/releases/
+        node-version: [22.x]  # 设置要测试的 Node.js 版本
 
     steps:
     - uses: actions/checkout@v4  # 检出代码仓库
@@ -26,3 +25,29 @@ jobs:
     - run: npm ci  # 使用 npm ci 安装依赖
     - run: npm run build --if-present  # 如果项目中有 build 脚本，则执行构建
     - run: npm test  # 运行测试
+
+  electron-build:
+    needs: build  # 依赖于之前的 build 步骤
+    runs-on: windows-latest  # 在 Windows 环境中构建 Electron 应用
+
+    steps:
+    - uses: actions/checkout@v4  # 检出代码仓库
+    - name: Use Node.js ${{ matrix.node-version }}  # 设置 Node.js 版本
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci  # 安装依赖
+    - run: npm run build --if-present  # 如果项目中有 build 脚本，则执行构建
+    - name: Install Electron Forge
+      run: |
+        npm install --save-dev electron-forge  # 安装 electron-forge
+        npm install --save-dev electron  # 安装 Electron
+    - name: Build Electron App
+      run: npm run make  # 使用 electron-forge 构建应用
+    - name: Publish to GitHub Releases
+      if: success()  # 如果构建成功则发布
+      uses: softprops/action-gh-release@v1  # GitHub 发布工具
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub Token 用于发布
+      with:
+        files: 'out/**/*'  # 发布 out 文件夹中的构建文件
