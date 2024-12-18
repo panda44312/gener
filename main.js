@@ -6,7 +6,7 @@ function createWindow() {
     width: 800,
     height: 600,
     
-    icon: path.join(__dirname, 'app-icon', 'app-icon.ico'), // 设置窗口图标
+    icon: path.join(__dirname, 'app-icon', 'app-256.png'), // 设置窗口图标
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
