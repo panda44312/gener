@@ -3,9 +3,9 @@ const path = require('path');
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    
+    width: 900,
+    height: 700,
+    frame: false,
     icon: path.join(__dirname, 'app-icon', 'app-256.png'), // 设置窗口图标
     webPreferences: {
       nodeIntegration: true,
@@ -13,7 +13,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadURL('https://google.com'); // 加载你的应用
+  mainWindow.loadURL('main.html'); // 加载你的应用
 }
 
 app.whenReady().then(createWindow);
