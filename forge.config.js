@@ -9,7 +9,9 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        icon: 'app-icon/app-icon.ico',
+      },
     },
     {
       name: '@electron-forge/maker-zip',
@@ -17,7 +19,9 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {},
+      config: {
+        icon: 'app-icon/app-256.png',
+      },
     },
     {
       name: '@electron-forge/maker-rpm',
