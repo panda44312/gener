@@ -1,4 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+//electron
+
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -10,10 +12,30 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      preload: path.join(__dirname, 'preload.js'),
     }
   });
 
-  mainWindow.loadURL('main.html'); // 加载你的应用
+  mainWindow.loadFile('./index.html'); // 加载你的应用
+
+  // 处理最小化、关闭和置顶的IPC消息
+  ipcMain.on('minimize', () => {
+    mainWindow.minimize();
+  });
+
+  ipcMain.on('close', () => {
+    mainWindow.close();
+  });
+
+  ipcMain.on('toggle-topmost', () => {
+    const isAlwaysOnTop = mainWindow.isAlwaysOnTop(); // 检测当前窗口是否置顶
+    if (isAlwaysOnTop) { // 如果已置顶
+      mainWindow.setAlwaysOnTop(false); // 取消置顶
+    } else {
+      mainWindow.setAlwaysOnTop(true); // 置顶
+    }
+  });
+
 }
 
 app.whenReady().then(createWindow);

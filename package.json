@@ -4,22 +4,45 @@
   "description": "gener",
   "main": "main.js",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
+    "start": "electron .",
+    "package": "electron-builder --dir",
+    "make": "electron-builder"
   },
   "author": "panda443212",
   "license": "ISC",
+  "build": {
+    
+    "appId": "com.example.gener",
+    "productName": "Gener",
+    "icon": "app-icon/app-icon",
+    "compression": "store",
+    "files": [
+      "**/*",
+      "!**/7z.exe"
+    ],
+    "mac": {
+      "target": "dmg",
+      "icon": "app-icon/app-icon.icns"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "app-icon/app-icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "app-icon/app-256.png"
+    },
+    "deb": {
+      "icon": "app-icon/app-256.png"
+    },
+    "rpm": {
+      "icon": "app-icon/app-256.png"
+    },
+    "asar": true
+  },
   "devDependencies": {
-    "@electron-forge/cli": "^7.6.0",
-    "@electron-forge/maker-deb": "^7.6.0",
-    "@electron-forge/maker-rpm": "^7.6.0",
-    "@electron-forge/maker-squirrel": "^7.6.0",
-    "@electron-forge/maker-zip": "^7.6.0",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
-    "@electron-forge/plugin-fuses": "^7.6.0",
-    "@electron/fuses": "^1.8.0",
-    "electron": "^33.2.1"
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1"

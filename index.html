@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gener</title>
+    <style>
+      body {
+        opacity: 0;
+      }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+    <script type="module">
+      import '@material/web/all.js';
+      import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+  
+      document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="./index.css" rel="stylesheet" crossorigin="anonymous">
+  <body>
+
+    <top-bar>
+      <md-icon><img src="./app-icon/app-icon.svg" /></md-icon>
+      <span>Gener</span>
+    </top-bar>
+
+    <right-btn>
+      <md-text-button trailing-icon class="control-button" onclick="toggleTopmost()">
+        <md-icon>push_pin</md-icon>
+      </md-text-button>
+      <md-text-button trailing-icon class="control-button" onclick="minimizeWindow()">
+        <md-icon>Remove</md-icon>
+      </md-text-button>
+      <md-text-button trailing-icon class="control-button" onclick="closeWindow()">
+        <md-icon>close</md-icon>
+      </md-text-button>
+    </right-btn>
+
+    <!-- 页面 -->
+    <div id="page-container">
+      <page class="active page-main">
+        <!-- 软件操作界面 -->
+      </page>
+      <page class="page-welcome" style="display: none;">
+        <container>
+          <img src="app-image/image-1.svg" />
+          <h1>欢迎</h1>
+          <p>Gener 是一款桌面上的AI绘图（ComfyUI）的图形界面应用，你可以使用 Gener 来文生图、图生图，以及更多...</p>
+          <md-text-button id="page-welcome-next">下一步</md-text-button>
+        </container>
+      </page>
+      <page class="page-welcome-comfyui" style="display: none;">
+        <container>
+          <img src="app-image/image-1.svg" />
+          <h1>下载 ComfyUI</h1>
+          <p>为了使 Gener 能够正常工作，你需要下载 ComfyUI。</p>
+          <p>
+            <md-linear-progress id="progress-bar" value="0" max="100"></md-linear-progress>
+          </p>
+          <md-text-button disabled onclick="closeWindow()">继续</md-text-button>
+        </container>
+      </page>
+      <page class="page-welcome-complete" style="display: none;">
+        <container>
+          <img src="app-image/image-1.svg" />
+          <h1>解压 ComfyUI</h1>
+          <p>已经成功下载了 ComfyUI ，正在解压中：</p>
+          <p>
+            <md-linear-progress id="progress-bar" indeterminate fourColor></md-linear-progress>
+          </p>
+          <md-text-button disabled onclick="closeWindow()">继续</md-text-button>
+        </container>
+      </page>
+    </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>

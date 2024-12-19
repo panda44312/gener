@@ -1,0 +1,123 @@
+body {
+    margin: 0;
+    background: var(--md-sys-color-background);
+    color: var(--app-color);
+}
+
+:root {
+    --app-color: #000000;
+    --md-ref-typeface-brand: 'Noto Sans SC';
+    --md-ref-typeface-plain: 'Noto Sans SC';
+    --md-sys-color-primary: #2196f3;
+    --md-sys-color-secondary: #2196f3;
+    --md-sys-color-background: #fff;
+    font-family: 'Noto Sans SC';
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --app-color: #fff;
+        --md-sys-color-primary: #2196f3;
+        --md-sys-color-secondary: #2196f3;
+        --md-sys-color-background: #222222;
+    }
+}
+
+top-bar {
+    display: flex;
+    height: 35px;
+    user-select: none;
+    -webkit-app-region: drag;
+    justify-content: center;
+    align-items: center;
+}
+
+.dark-mode {
+    background-color: #181818;
+    color: #fff;
+}
+
+top-bar md-icon img {
+    width: 16px;
+    height: 16px;
+    user-select: none;
+}
+
+top-bar {
+    font-size: 14px;
+}
+
+right-btn {
+    display: flex;
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 35px;
+}
+
+right-btn md-text-button md-icon {
+    font-size: 16px;
+}
+
+right-btn md-text-button {
+    width: 50px;
+    -webkit-app-region: no-drag;
+    border-radius: 0;
+    height: 35px;
+    min-height: inherit;
+}
+
+body.on {
+    opacity: 1;
+}
+
+body page {
+    font-family: 'Noto Sans SC';
+    position: fixed;
+    top: 35px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+}
+
+::selection {
+    background-color: #008cff50;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #008cff70;
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #008cff80;
+}
+
+
+.page-welcome, .page-welcome-comfyui, .page-welcome-complete {
+    display: flex;
+    padding: 40px;
+    padding-top: 5vh;
+    justify-content: center;
+    user-select: none;
+}
+
+.page-welcome container, .page-welcome-comfyui container, .page-welcome-complete container {
+    display: block;
+    max-width: 600px;
+    width: 600px;
+}
+
+.page-welcome container md-text-button, .page-welcome-comfyui container md-text-button, .page-welcome-complete container md-text-button {
+    width: 100%;
+}
