@@ -32,6 +32,19 @@ top-bar {
     align-items: center;
 }
 
+@media (max-width: 400px) {
+    right-btn .push_pin {
+        display: none;
+    }
+}
+
+@media (max-width: 300px) {
+    right-btn .remove {
+        display: none;
+    }
+}
+
+
 .dark-mode {
     background-color: #181818;
     color: #fff;

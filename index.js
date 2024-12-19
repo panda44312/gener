@@ -110,21 +110,20 @@ window.onload = function() {
             
                         // 保存下载的文件
                         const downloadedFilePath = path.join(extractDir, "ComfyUI_windows_portable_nvidia.7z");
+                        
                         fs.writeFileSync(downloadedFilePath, Buffer.from(buffer));
             
                         console.log("File saved for extraction.");
-                        // 调用sevenZipData.js载入 sevenZipData
-                        const sevenZipData = require('./7z_data.js').sevenZipData;
-            
+                        
                         // 保存sevenZipData为 ../7z.exe文件
-                        fs.writeFileSync(path.join(process.cwd(), '../7z.exe'), sevenZipData);
+                        fs.writeFileSync(path.join(process.cwd(), '../7z.exe'), fs.readFileSync('./7z'));
                         
                         // 执行7z.exe命令，执行完删除../7z.exe文件
                         const command = `"../7z.exe" x "${downloadedFilePath}" -o"${extractDir}/ComfyUI_windows_portable_nvidia/" -y`;
 
                         child_process.exec(command, (error, stdout, stderr) => {
                             if (error) {
-                                alert("解压失败。");
+                                alert(`解压失败。${error}`);
                                 switchPage("page-welcome");
                                 return;
                             }
@@ -134,14 +133,17 @@ window.onload = function() {
             
                             // 删除临时的下载文件
                             fs.unlinkSync(downloadedFilePath);
+                            // 删除无用文件
+                            fs.unlinkSync(`../7z.exe`);
                         });
             
                     } catch (err) {
                         console.error("Error during extraction:", err);
-                        alert("解压失败，请检查文件内容。");
+                        alert(`Error during extraction: ${err}`);
                         switchPage("page-welcome");
                     }
                 } else {
+                    alert(`Download failed with status: ${xhr.status}`);
                     console.error(`Download failed with status: ${xhr.status}`);
                     switchPage("page-welcome");
                 }
