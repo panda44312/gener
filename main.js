@@ -23,6 +23,10 @@ function createWindow() {
     mainWindow.minimize();
   });
 
+  ipcMain.on('getUserDataPath', (event) => {
+    event.reply('userDataPath', app.getPath('appData'));
+  });
+
   ipcMain.on('close', () => {
     mainWindow.close();
   });

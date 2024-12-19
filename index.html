@@ -30,7 +30,25 @@
   <body>
 
     <top-bar>
-      <md-icon><img src="./app-icon/app-icon.svg" /></md-icon>
+      <md-icon>
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        <svg width="100%" height="100%" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+            <path d="M128,32L128,96C128,113.661 113.661,128 96,128L32,128C14.339,128 0,113.661 0,96L0,32C0,14.339 14.339,0 32,0L96,0C113.661,0 128,14.339 128,32Z" style="fill:white;"/>
+            <path d="M129,32L129,96C129,114.213 114.213,129 96,129L32,129C13.787,129 -1,114.213 -1,96L-1,32C-1,13.787 13.787,-1 32,-1L96,-1C114.213,-1 129,13.787 129,32ZM128,32C128,14.339 113.661,0 96,0L32,0C14.339,0 0,14.339 0,32L0,96C0,113.661 14.339,128 32,128L96,128C113.661,128 128,113.661 128,96L128,32Z" style="fill:white;"/>
+            <g transform="matrix(0.920249,0,0,0.959243,17.9875,16.0379)">
+                <g transform="matrix(1,0,0,1,-15,-15)">
+                    <path d="M20,110L110,110" style="fill:none;stroke: var(--md-sys-color-primary);stroke-width:9.57px;"/>
+                </g>
+                <g transform="matrix(1,0,0,1,-15,-15)">
+                    <path d="M75,20L30,110L100,110L55,20" style="fill:none;stroke: var(--md-sys-color-primary);stroke-width:9.57px;"/>
+                </g>
+                <g transform="matrix(1,0,0,1,-15,-15)">
+                    <path d="M50,110L65,80L80,110" style="fill:none;stroke: var(--md-sys-color-primary);stroke-width:8.51px;"/>
+                </g>
+            </g>
+        </svg>        
+      </md-icon>
       <span>Gener</span>
     </top-bar>
 
@@ -54,7 +72,14 @@
       </page>
       <page class="page-welcome" style="display: none;">
         <container>
-          <img src="app-image/image-1.svg" />
+          <svg viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+            <g transform="matrix(1.0989,0,0,1.04167,0,0)">
+                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="var(--md-sys-color-primary)" text-anchor="middle">
+                  new_releases
+                </text>
+                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:var(--md-sys-color-primary);fill-opacity:0.18;"/>
+            </g>
+          </svg>
           <h1>欢迎</h1>
           <p>Gener 是一款桌面上的AI绘图（ComfyUI）的图形界面应用，你可以使用 Gener 来文生图、图生图，以及更多...</p>
           <md-text-button id="page-welcome-next">下一步</md-text-button>
@@ -62,24 +87,38 @@
       </page>
       <page class="page-welcome-comfyui" style="display: none;">
         <container>
-          <img src="app-image/image-1.svg" />
+          <svg viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+            <g transform="matrix(1.0989,0,0,1.04167,0,0)">
+                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="var(--md-sys-color-primary)" text-anchor="middle">
+                  deployed_code_update
+                </text>
+                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:var(--md-sys-color-primary);fill-opacity:0.18;"/>
+            </g>
+          </svg>
           <h1>下载 ComfyUI</h1>
           <p>为了使 Gener 能够正常工作，你需要下载 ComfyUI。</p>
           <p>
             <md-linear-progress id="progress-bar" value="0" max="100"></md-linear-progress>
           </p>
-          <md-text-button disabled onclick="closeWindow()">继续</md-text-button>
+          <md-text-button disabled>继续</md-text-button>
         </container>
       </page>
       <page class="page-welcome-complete" style="display: none;">
         <container>
-          <img src="app-image/image-1.svg" />
+          <svg viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+            <g transform="matrix(1.0989,0,0,1.04167,0,0)">
+                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="var(--md-sys-color-primary)" text-anchor="middle">
+                  outbox
+                </text>
+                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:var(--md-sys-color-primary);fill-opacity:0.18;"/>
+            </g>
+          </svg>
           <h1>解压 ComfyUI</h1>
-          <p>已经成功下载了 ComfyUI ，正在解压中：</p>
+          <p id="next_text">已经成功下载了 ComfyUI ，正在解压中：</p>
           <p>
-            <md-linear-progress id="progress-bar" indeterminate fourColor></md-linear-progress>
+            <md-linear-progress id="progress-bar" indeterminate></md-linear-progress>
           </p>
-          <md-text-button disabled onclick="closeWindow()">继续</md-text-button>
+          <md-text-button disabled id="next">继续</md-text-button>
         </container>
       </page>
     </div>

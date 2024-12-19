@@ -16,10 +16,6 @@
     "productName": "Gener",
     "icon": "app-icon/app-icon",
     "compression": "store",
-    "files": [
-      "**/*",
-      "!**/7z.exe"
-    ],
     "mac": {
       "target": "dmg",
       "icon": "app-icon/app-icon.icns"

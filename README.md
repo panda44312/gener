@@ -1,3 +1,3 @@
 ## Gener
 
-Gener 是一款桌面 ComfyUI 的图形界面程序，对 ComfyUI 的功能进行了封装。
+Gener 是一款桌面上的AI绘图（ComfyUI）的图形界面应用，你可以使用 Gener 来文生图、图生图，以及更多...
