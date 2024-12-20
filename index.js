@@ -1,4 +1,3 @@
-
 //载入node.js文件模块
 const fs = require('fs');
 const path = require('path');
@@ -6,6 +5,7 @@ const { ipcRenderer } = require('electron');
 const { exec } = require('child_process');
 const child_process = require('child_process');
 const http = require('http');
+const { console } = require('inspector');
 
 const port = 8190;
 //全局变量
@@ -145,7 +145,7 @@ const getComfyUIDir = () => {
 
                     child_process.exec(command, (error, stdout, stderr) => {
                         if (error) {
-                            alert(`解压失败。${error}`);
+                            openDialog('error', '解压失败', `解压失败。`);
                             switchPage("page-welcome");
                             return;
                         }
@@ -166,12 +166,11 @@ const getComfyUIDir = () => {
         
                 } catch (err) {
                     console.error("Error during extraction:", err);
-                    alert(`Error during extraction: ${err}`);
+                    openDialog('error', '解压失败', `解压失败。`);
                     switchPage("page-welcome");
                 }
             } else {
-                alert(`Download failed with status: ${xhr.status}`);
-                console.error(`Download failed with status: ${xhr.status}`);
+                openDialog('error', '下载失败', `下载失败，状态码: ${xhr.status}`);
                 switchPage("page-welcome");
             }
         };
@@ -181,7 +180,7 @@ const getComfyUIDir = () => {
         
     
         xhr.onerror = () => {
-            console.error("Error during download.");
+            openDialog('error', '下载失败', '下载过程中发生错误。');
             switchPage("page-welcome");
         };
     
@@ -276,34 +275,29 @@ const loadApp = () => {
         } else {
             exec('wmic path win32_VideoController get name', (err, stdout, stderr) => {
                 if (err) {
-                    console.error(err);
+                    openDialog('error', '显卡检测失败', '显卡检测过程中发生错误。');
                     return;
                 }
                 if (stdout.includes("NVIDIA")) {
                     console.log("NVIDIA显卡检测通过。");
-                    const command = `"${path.join(comfyUIPathPython, 'python_embeded/python.exe')}" -s ${path.join(comfyUIPathPython, 'ComfyUI/main.py')} --port ${port}`;
+                    const command = `"${path.join(comfyUIPathPython, 'python_embeded/python.exe')}" -s ${path.join(comfyUIPathPython, 'ComfyUI/main.py')} --port ${port}  `;
                     comfyUIProcess = exec(command, (err, stdout, stderr) => {
                         if (err) {
-                            console.error("Error starting ComfyUI with NVIDIA GPU:", err);
-                            console.error(stderr);
-                            alert("ComfyUI启动失败。", err);
+                            openDialog('error', '启动失败', 'ComfyUI启动失败。');
                         } else {
                             console.log("ComfyUI started successfully with NVIDIA GPU.");
                             
                             $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
                             console.log(stdout);
                         }
-                        
                     });
                 } else {
-                    alert("检测到您的电脑没有NVIDIA显卡，ComfyUI将使用CPU运行，速度可能会较慢。");
+                    openDialog('error', '显卡检测失败', '检测到您的电脑没有NVIDIA显卡，ComfyUI将使用CPU运行，速度可能会较慢。');
                     console.log("No NVIDIA GPU detected. Starting with CPU...");
                     const command = `"${path.join(comfyUIPathPython, 'python_embeded/python.exe')}" -s ${path.join(comfyUIPathPython, 'ComfyUI/main.py')} --port ${port} --cpu`;
                     comfyUIProcess = exec(command, (err, stdout, stderr) => {
                         if (err) {
-                            console.error("Error starting ComfyUI with CPU:", err);
-                            console.error(stderr);
-                            alert("ComfyUI启动失败。", err);
+                            openDialog('error', '启动失败', 'ComfyUI启动失败。');
                         } else {
                             console.log("ComfyUI started successfully with CPU.");
                             
@@ -342,39 +336,39 @@ const loadApp = () => {
         });
     });
 
- deleteModel = (file) => {
-        const dialog = document.createElement('md-dialog');
-        dialog.setAttribute('type', 'alert');
-        dialog.innerHTML = `
-            <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
-            <form slot="content" id="form-id" method="dialog">
-                您确定要删除模型 “${file}” 吗？
-            </form>
-            <div slot="actions">
-                <md-text-button form="form-id" value="cancel">取消</md-text-button>
-                <md-text-button form="form-id" value="delete">删除</md-text-button>
-            </div>
-        `;
-        document.body.appendChild(dialog);
-    
-        dialog.addEventListener('close', () => {
-            if (dialog.returnValue === 'delete') {
-                fs.unlink(path.join(modelPath, file), (err) => {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                    const modelItem = Array.from(modelList.children).find(item => item.querySelector('span').textContent === file);
-                    if (modelItem) {
-                        modelList.removeChild(modelItem);
-                    }
-                });
-            }
-            document.body.removeChild(dialog);
-        });
-    
-        dialog.show();
-    }
+    deleteModel = (file) => {
+            const dialog = document.createElement('md-dialog');
+            dialog.setAttribute('type', 'alert');
+            dialog.innerHTML = `
+                <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
+                <form slot="content" id="form-id" method="dialog">
+                    您确定要删除模型 “${file}” 吗？
+                </form>
+                <div slot="actions">
+                    <md-text-button form="form-id" value="cancel">取消</md-text-button>
+                    <md-text-button form="form-id" value="delete">删除</md-text-button>
+                </div>
+            `;
+            document.body.appendChild(dialog);
+        
+            dialog.addEventListener('close', () => {
+                if (dialog.returnValue === 'delete') {
+                    fs.unlink(path.join(modelPath, file), (err) => {
+                        if (err) {
+                            openDialog('error', '删除失败', '删除模型过程中发生错误。');
+                            return;
+                        }
+                        const modelItem = Array.from(modelList.children).find(item => item.querySelector('span').textContent === file);
+                        if (modelItem) {
+                            modelList.removeChild(modelItem);
+                        }
+                    });
+                }
+                document.body.removeChild(dialog);
+            });
+        
+            dialog.show();
+        }
 
     modelPathButton.onclick = () => {
         const command = 'explorer.exe ' + modelPathE.value;
@@ -385,10 +379,272 @@ const loadApp = () => {
         });
     }
 
+    //图片生成逻辑
+    const generateButton = $("#app-core-image-generator #generate-button");
+
+    generateButton.onclick = () => {
+
+        //获取完整数据
+        const modelSelect = $("#app-core-image-generator #model-select");
+        const textField = $("#app-core-image-generator #prompt");
+        const sizeSelect = $("#app-core-image-generator #size-select");
+        const steps = $("#app-core-image-generator #setps-slider");
+        const batchSize = $("#app-core-image-generator #batch-size");
+
+        if(batchSize.value === '0') {
+            batchSize.value = 1;
+        }
+
+        if (steps.value === '0') {
+            steps.value = 20;
+        }
+
+        if (textField.value === '') {
+            openDialog('error', '生成失败', '请输入一个提示词。');
+            return;
+        }
+
+        if (modelSelect.value === '') {
+            openDialog('error', '生成失败', '请选择一个模型。');
+            return;
+        }
+
+        const model = modelSelect.value;
+        const prompt = textField.value;
+        const size = sizeSelect.value;
+        const seedValue = Math.floor(Math.random() * Math.pow(2, 32));
+        const stepsValue = steps.value;
+        const sizeValue = size.split('x');
+        const batchSizeValue = batchSize.value;
+
+        generateButton.disabled = true;
+        generateButton.textContent = "生成中...";
+
+        //创造向api请求的json, 由于使用的是 comfyUI，需要构造工作流
+        const data = {
+            "6": {
+              "inputs": {
+                "text": prompt,
+                "clip": [
+                  "30",
+                  1
+                ]
+              },
+              "class_type": "CLIPTextEncode",
+              "_meta": {
+                "title": "提示词"
+              }
+            },
+            "8": {
+              "inputs": {
+                "samples": [
+                  "31",
+                  0
+                ],
+                "vae": [
+                  "30",
+                  2
+                ]
+              },
+              "class_type": "VAEDecode",
+              "_meta": {
+                "title": "VAE解码"
+              }
+            },
+            "9": {
+              "inputs": {
+                "filename_prefix": "ComfyUI",
+                "images": [
+                  "8",
+                  0
+                ]
+              },
+              "class_type": "SaveImage",
+              "_meta": {
+                "title": "保存图像"
+              }
+            },
+            "27": {
+              "inputs": {
+                "width": sizeValue[0],
+                "height": sizeValue[1],
+                "batch_size": batchSizeValue
+              },
+              "class_type": "EmptySD3LatentImage",
+              "_meta": {
+                "title": "创建一个画布"
+              }
+            },
+            "30": {
+              "inputs": {
+                "ckpt_name": model
+              },
+              "class_type": "CheckpointLoaderSimple",
+              "_meta": {
+                "title": "载入模型"
+              }
+            },
+            "31": {
+              "inputs": {
+                "seed": seedValue,
+                "steps": stepsValue,
+                "cfg": 1,
+                "sampler_name": "euler",
+                "scheduler": "simple",
+                "denoise": 1,
+                "model": [
+                  "30",
+                  0
+                ],
+                "positive": [
+                  "6",
+                  0
+                ],
+                "negative": [
+                  "33",
+                  0
+                ],
+                "latent_image": [
+                  "27",
+                  0
+                ]
+              },
+              "class_type": "KSampler",
+              "_meta": {
+                "title": "生成"
+              }
+            },
+            "33": {
+              "inputs": {
+                "text": "",
+                "clip": [
+                  "30",
+                  1
+                ]
+              },
+              "class_type": "CLIPTextEncode",
+              "_meta": {
+                "title": "负面提升*"
+              }
+            }
+        };
+
+        fetch(`http://127.0.0.1:${port}/prompt`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                client_id: 'ComfyUI',
+                prompt: data
+            })
+        })
+        .catch(err => {
+            openDialog('error', '生成失败', '生成过程中发生错误。');
+        });
+
+        const ws = new WebSocket(`ws://127.0.0.1:${port}/ws?clientId=ComfyUI`);
+
+        ws.onopen = () => {
+            console.log('WebSocket opened.');
+        }
+
+        const progressBar = $("#app-core-image-generator #progress-bar");
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'progress') {
+                progressBar.value = data.data.value;
+                progressBar.max = data.data.max;
+            }
+
+            if (data.type === 'status') {
+                const queueRemaining = data.data.status.exec_info.queue_remaining;
+                console.log(`Queue remaining: ${queueRemaining}`);
+            }
+
+            if (data.type === 'execution_start') {
+                const promptId = data.data.prompt_id;
+                console.log(`Execution started for prompt ${promptId}`);
+            }
+
+            if (data.type === 'executing') {
+                const node = data.data.node;
+                const promptId = data.data.prompt_id;
+                console.log(`Executing node ${node} for prompt ${promptId}`);
+                
+                if (node === null) {
+                    const promptId = data.data.prompt_id;
+                    fetch(`http://127.0.0.1:${port}/history/${promptId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+
+                            if(data[promptId].outputs == null) {
+                                openDialog('error', '生成失败', '生成失败，ComfyUI 发生错误。');
+                                console.log('No output images found.');
+                                return;
+                            }
+
+                            const images = data[promptId].outputs['9'].images;
+                            const imageUrls = [];
+
+                            for (const image of images) {
+                                let fileName = image.filename;
+                                let imageUrl = `http://127.0.0.1:${port}/view?filename=${fileName}&type=output`;
+                                imageUrls.push(imageUrl);
+                            }
+
+                            for (const imageUrl of imageUrls) {
+                                const image = document.createElement('img');
+                                image.src = imageUrl;
+                                const imageContainer = $("#app-core-image-viewer");
+                                imageContainer.appendChild(image);
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            openDialog('error', '生成失败', '获取生成历史过程中发生错误。');
+                        });
+    
+                    generateButton.textContent = "生成";
+                    generateButton.disabled = false;
+
+                }
+            }
+            
+        }
+
+
+    }
+        
+
+
+}
+
+//diglog
+const openDialog = (icon, headline, content) => {
+    const dialog = document.createElement('md-dialog');
+    dialog.setAttribute('type', 'alert');
+    dialog.innerHTML = `
+        <div slot="headline"><md-icon>${icon}</md-icon>${headline}</div>
+        <form slot="content" id="form-id" method="dialog">
+            ${content}
+        </form>
+        <div slot="actions">
+            <md-text-button form="form-id" value="ok">确定</md-text-button>
+        </div>
+
+    `;
+    document.body.appendChild(dialog);
+    dialog.show();
+    dialog.addEventListener('close', () => {
+        document.body.removeChild(dialog);
+    });
 }
 
 const downloadModel = (url) => {
-    //                <md-text-button slot="end" data-download-url="https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors">下载</md-text-button>
+    //                <md-text-button slot="e        nd" data-download-url="https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors">下载</md-text-button>
     const dialog = document.createElement('md-dialog');
     dialog.setAttribute('type', 'alert');
     dialog.innerHTML = `
@@ -466,12 +722,14 @@ const downloadModel = (url) => {
                         `;
                         document.querySelector('.page-model #model-list').appendChild(modelItem);
                     });
+                } else {
+                    openDialog('error', '下载失败', '下载模型过程中发生错误。');
                 }
                 dialog.hide();
             };
 
             xhr.onerror = () => {
-                console.error('Error downloading model.');
+                openDialog('error', '下载失败', '下载模型过程中发生错误。');
                 dialog.hide();
             };
             xhr.send();

@@ -71,6 +71,9 @@
             <md-icon-button id="home-button" onclick='switchContainer("#home-button", "container-main");'>
               <md-icon>home</md-icon>
             </md-icon-button>
+            <md-icon-button id="history-button" onclick='switchContainer("#history-button", "container-history");'>
+              <md-icon>history</md-icon>
+            </md-icon-button>
             <md-icon-button id="model-button" onclick='switchContainer("#model-button", "container-model");'>
               <md-icon>deployed_code</md-icon>
             </md-icon-button>
@@ -90,60 +93,59 @@
 
         <container class="container-main">
 
-          <app-left>
+          <app-left id="app-core-image-generator">
 
             <p>
-              <md-outlined-select label="模型" outlined value="flux1-dev-fp8.safetensors">
+              <md-outlined-select label="模型" outlined value="flux1-dev-fp8.safetensors" id="model-select">
                 <md-select-option selected value="flux1-dev-fp8.safetensors">
                   <md-icon slot="start">deployed_code</md-icon>
                   flux1-dev-fp8
                 </md-select-option>
-                <md-select-option value="pixelwave_flux1_dev_nf4_03.safetensors">
-                  <md-icon slot="start">deployed_code</md-icon>
-                  pixelwave_flux1_dev_nf4_03
-                </md-select-option>
               </md-outlined-select>
             </p>
 
             <p>
-              <md-outlined-text-field id="text-field" type="textarea" placeholder="提示词" rows="6"></md-outlined-text-field>
+              <md-outlined-text-field id="prompt" type="textarea" label="提示词" rows="6"></md-outlined-text-field>
             </p>
 
             <p>
-              <md-outlined-select id="select" label="尺寸" outlined value="1024x1024">
-                <md-select-option value="1024x1024">1024x1024</md-select-option>
-                <md-select-option value="768x768">768x768</md-select-option>
-                <md-select-option value="800x1000">800x1000</md-select-option>
-                <md-select-option value="">768x768</md-select-option>
-
+              <md-outlined-select label="尺寸" outlined value="1024x1024" id="size-select">
+                <md-select-option value="1024x1024"><md-icon slot="start">crop_square</md-icon>1:1 (1024x1024)</md-select-option>
+                <md-select-option value="768x768"  ><md-icon slot="start">crop_square</md-icon>1:1 (768x768)</md-select-option>
+                <md-select-option value="800x1000" ><md-icon slot="start">crop_free</md-icon>4:5 (800x1000)</md-select-option>
+                <md-select-option value="1280x720" ><md-icon slot="start">crop_16_9</md-icon>16:9 (1280x720)</md-select-option>
+                <md-select-option value="720x1280" ><md-icon slot="start">crop_9_16</md-icon>9:16 (720x1280)</md-select-option>
+                <md-select-option value="768x1024" ><md-icon slot="start">crop_free</md-icon>3:4 (768x1024)</md-select-option>
               </md-outlined-select>
             </p>
-
             <p>
-              <md-slider id="slider" min="1" max="20" step="1" value="1" discrete></md-slider>
+              <md-outlined-text-field type="number" label="生成批次" id="batch-size" value="1"></md-outlined-text-field>
+            </p>
+            <p style="display: flex;">
+              <md-slider id="setps-slider" min="1" max="30" step="1" value="20" discrete label="Setps" oninput="
+                $('#app-core-image-generator #setps-slider-show').value = $('#app-core-image-generator #setps-slider').value;
+              "></md-slider>
+
+              <md-outlined-text-field type="number" label="步数" disabled id="setps-slider-show" style="width: 70px; min-width: 70px;" value="20"></md-outlined-text-field>
+            </p>
+            <p>
+              <md-linear-progress id="progress-bar" value="0" max="100"></md-linear-progress>
             </p>
 
             <p>
-              <md-text-button id="next">生成</md-text-button>
+              <md-text-button id="generate-button">生成</md-text-button>
             </p>
           </app-left>
 
-          <app-right>
-            <!-- 提示词文本框，尺寸选择，步数 -->
-             <app-card>
-              1
-             </app-card>
-             <app-card>
-              2
-             </app-card>
-             <app-card>
-              3
-             </app-card>
-             <app-card>
-              4
-             </app-card>
+          <app-right id="app-core-image-viewer">
           </app-left>
 
+        </container>
+
+        <container class="container-history" style="display: none;">
+          <h1>历史记录</h1>
+          <p>这里可以查看生成的图片，下载图片，删除图片等。</p>
+          <md-list id="history-list"></md-list>
         </container>
 
         <container class="container-model" style="display: none;">
@@ -154,9 +156,10 @@
             <md-outlined-text-field disabled="true" id="model-path" style="zoom: 60%; width: 100%;"></md-outlined-text-field>
             <md-text-button id="model-path-button">打开</md-text-button>
           </p>
-          <p>模型列表：</p>
-          <md-list id="model-list">
-          </md-list>
+          <p>
+            <md-list id="model-list"></md-list>
+          </p>
+
         </container>
 
         <container class="container-download" style="display: none;">
@@ -197,7 +200,7 @@
           <span id="memory-usage">0GB/0GB</span>
         </span>
         <span>
-          <md-icon>mode_fan</md-icon>
+          <md-icon id="mode_fan">mode_fan</md-icon>
           <span id="gpu-load">0%</span>
         </span>
         <span>
