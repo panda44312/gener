@@ -1,7 +1,6 @@
-//electron
-
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const { exec } = require('child_process');
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -45,7 +44,7 @@ function createWindow() {
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  //运行exec 结束python进程
+  exec('taskkill /f /im python.exe');
+  app.quit();
 });

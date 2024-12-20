@@ -9,9 +9,8 @@
     "make": "electron-builder"
   },
   "author": "panda443212",
-  "license": "ISC",
+  "license": "MIT",
   "build": {
-    
     "appId": "com.example.gener",
     "productName": "Gener",
     "icon": "app-icon/app-icon",
@@ -41,6 +40,7 @@
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
+    "@material/web": "^2.2.0",
     "electron-squirrel-startup": "^1.0.1"
   }
 }

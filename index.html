@@ -7,6 +7,7 @@
     <style>
       body {
         opacity: 0;
+        transition: opacity 0.5s;
       }
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
@@ -31,11 +32,7 @@
 
     <top-bar>
       <md-icon>
-        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
         <svg width="100%" height="100%" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
-            <path d="M128,32L128,96C128,113.661 113.661,128 96,128L32,128C14.339,128 0,113.661 0,96L0,32C0,14.339 14.339,0 32,0L96,0C113.661,0 128,14.339 128,32Z" style="fill:white;"/>
-            <path d="M129,32L129,96C129,114.213 114.213,129 96,129L32,129C13.787,129 -1,114.213 -1,96L-1,32C-1,13.787 13.787,-1 32,-1L96,-1C114.213,-1 129,13.787 129,32ZM128,32C128,14.339 113.661,0 96,0L32,0C14.339,0 0,14.339 0,32L0,96C0,113.661 14.339,128 32,128L96,128C113.661,128 128,113.661 128,96L128,32Z" style="fill:white;"/>
             <g transform="matrix(0.920249,0,0,0.959243,17.9875,16.0379)">
                 <g transform="matrix(1,0,0,1,-15,-15)">
                     <path d="M20,110L110,110" style="fill:none;stroke: var(--md-sys-color-primary);stroke-width:9.57px;"/>
@@ -66,10 +63,149 @@
 
     <!-- 页面 -->
     <div id="page-container">
-      <page class="active page-main">
-        <!-- 软件操作界面 -->
-         你好！
+
+      <page class="active page-main app-core">
+
+        <!-- 构建基本ai生图软件的界面，历史记录，提示词等 -->
+        <left-bar>
+            <md-icon-button id="home-button" onclick='switchContainer("#home-button", "container-main");'>
+              <md-icon>home</md-icon>
+            </md-icon-button>
+            <md-icon-button id="model-button" onclick='switchContainer("#model-button", "container-model");'>
+              <md-icon>deployed_code</md-icon>
+            </md-icon-button>
+            <md-icon-button id="download-button" onclick='switchContainer("#download-button", "container-download");'>
+              <md-icon>deployed_code_update</md-icon>
+            </md-icon-button>
+            <md-icon-button id="comfyui-web-button" onclick='switchContainer("#comfyui-web-button", "container-comfyui-web");'>
+             <md-icon>build</md-icon>
+            </md-icon-button>
+            <md-icon-button id="refresh-button" onclick='switchContainer("#comfyui-web-button", "container-comfyui-web"); document.querySelector(".container-comfyui-web").src = `http://127.0.0.1:${port}`;' style="margin-top: auto;">
+              <md-icon>refresh</md-icon>
+            </md-icon-button>
+            <md-icon-button id="settings-button" onclick='switchContainer("#settings-button", "container-settings");'>
+              <md-icon>settings</md-icon>
+            </md-icon-button>
+        </left-bar>
+
+        <container class="container-main">
+
+          <app-left>
+
+            <p>
+              <md-outlined-select label="模型" outlined value="flux1-dev-fp8.safetensors">
+                <md-select-option selected value="flux1-dev-fp8.safetensors">
+                  <md-icon slot="start">deployed_code</md-icon>
+                  flux1-dev-fp8
+                </md-select-option>
+                <md-select-option value="pixelwave_flux1_dev_nf4_03.safetensors">
+                  <md-icon slot="start">deployed_code</md-icon>
+                  pixelwave_flux1_dev_nf4_03
+                </md-select-option>
+              </md-outlined-select>
+            </p>
+
+            <p>
+              <md-outlined-text-field id="text-field" type="textarea" placeholder="提示词" rows="6"></md-outlined-text-field>
+            </p>
+
+            <p>
+              <md-outlined-select id="select" label="尺寸" outlined value="1024x1024">
+                <md-select-option value="1024x1024">1024x1024</md-select-option>
+                <md-select-option value="768x768">768x768</md-select-option>
+                <md-select-option value="800x1000">800x1000</md-select-option>
+                <md-select-option value="">768x768</md-select-option>
+
+              </md-outlined-select>
+            </p>
+
+            <p>
+              <md-slider id="slider" min="1" max="20" step="1" value="1" discrete></md-slider>
+            </p>
+
+            <p>
+              <md-text-button id="next">生成</md-text-button>
+            </p>
+          </app-left>
+
+          <app-right>
+            <!-- 提示词文本框，尺寸选择，步数 -->
+             <app-card>
+              1
+             </app-card>
+             <app-card>
+              2
+             </app-card>
+             <app-card>
+              3
+             </app-card>
+             <app-card>
+              4
+             </app-card>
+          </app-left>
+
+        </container>
+
+        <container class="container-model" style="display: none;">
+          <h1>模型文件管理</h1>
+          <p>这里可以管理模型，下载模型，删除模型等。</p>
+          <p style="margin: 0; display: flex; align-items: center;">
+            <span style="display: block; width: 80px;">路径：</span>
+            <md-outlined-text-field disabled="true" id="model-path" style="zoom: 60%; width: 100%;"></md-outlined-text-field>
+            <md-text-button id="model-path-button">打开</md-text-button>
+          </p>
+          <p>模型列表：</p>
+          <md-list id="model-list">
+          </md-list>
+        </container>
+
+        <container class="container-download" style="display: none;">
+          <h1>模型下载</h1>
+          <p>这里可以下载 Flux 的模型。</p>
+          <md-list id="model-list">
+            <md-list-item>
+              <md-list-item-text>Flux1 (dev) fp8</md-list-item-text>
+              <md-icon slot="start">deployed_code</md-icon>
+              <md-text-button slot="end" onclick="downloadModel('https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors')">下载</md-text-button>
+
+            </md-list-item>
+            <md-list-item>
+              <md-list-item-text>Flux1 (Schnell) fp8</md-list-item-text>
+              <md-icon slot="start">deployed_code</md-icon>
+                <md-text-button slot="end" onclick="downloadModel('https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors')">下载</md-text-button>
+            </md-list-item>
+        </container>
+
+        <iframe    class="container-comfyui-web" style="display: none;" src="http://127.0.0.1:8190"></iframe>
+
+        <container class="container-settings" style="display: none;">
+          <h1>关于</h1>
+          <p>Gener 是一款桌面上的AI绘图（ComfyUI）的图形界面应用，你可以使用 Gener 来文生图、图生图，以及更多...</p>
+          <p>信息：</p>
+          <p>版本号：0.0.1</p>
+        </container>
+
       </page>
+      
+      <bottom-bar id="app-core-bottom-bar">
+        <span>
+          <md-icon>computer</md-icon>
+          <span id="cpu-load">0%</span>
+        </span>
+        <span>
+          <md-icon>memory</md-icon>
+          <span id="memory-usage">0GB/0GB</span>
+        </span>
+        <span>
+          <md-icon>mode_fan</md-icon>
+          <span id="gpu-load">0%</span>
+        </span>
+        <span>
+          <md-icon>memory</md-icon>
+          <span id="gpu-memory-used">0GB/0GB</span>
+        </span>
+      </bottom-bar>
+
       <page class="page-welcome" style="display: none;">
         <container>
           <svg viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
@@ -85,6 +221,7 @@
           <md-text-button id="page-welcome-next">下一步</md-text-button>
         </container>
       </page>
+      
       <page class="page-welcome-comfyui" style="display: none;">
         <container>
           <svg viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">

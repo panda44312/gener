@@ -6,24 +6,32 @@ body {
 
 :root {
     --app-color: #000000;
+    --app-bg: #ffffff;
     --md-ref-typeface-brand: 'Noto Sans SC';
     --md-ref-typeface-plain: 'Noto Sans SC';
-    --md-sys-color-primary: #F44336;
-    --md-sys-color-secondary: #F44336;
-    --md-sys-color-background: #fff;
+    --md-sys-color-primary-o: 33, 150, 243;
+    --md-sys-color-primary: rgb(var(--md-sys-color-primary-o));
+    --md-sys-color-secondary: rgb(var(--md-sys-color-primary-o));
+    --md-list-container-color: rgb(var(--md-sys-color-primary-o), 0.1);
     font-family: 'Noto Sans SC';
 }
 
 ::selection {
-    background-color: #2196f360;
+    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
         --app-color: #fff;
-        --md-sys-color-primary: #2196f3;
-        --md-sys-color-secondary: #2196f3;
         --md-sys-color-background: #222222;
+        --md-icon-button-icon-color: #ffffff;
+        --md-icon-button-disabled-icon-color: #484848;
+        --md-icon-button-hover-icon-color: #ffffff;
+        --md-icon-button-focus-icon-color: #ffffff;
+        --md-icon-button-hover-state-layer-color: #ffffff;
+        --md-icon-button-pressed-state-layer-color: #ffffff;
+        --md-icon-button-pressed-icon-color: #ffffff;
+        --md-outlined-text-field-input-text-color: #ffffff;
     }
 }
 
@@ -39,6 +47,9 @@ top-bar {
 @media (max-width: 400px) {
     right-btn .push_pin {
         display: none;
+    }
+    bottom-bar > span > span {
+        display: none !IMPORTANT;
     }
 }
 
@@ -96,11 +107,13 @@ body page {
     right: 0;
     bottom: 0;
     overflow: auto;
+    background-color: var(--app-bg);
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 5px;
+    height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -119,10 +132,10 @@ body page {
 
 .page-welcome, .page-welcome-comfyui, .page-welcome-complete {
     display: flex;
-    padding: 50px;
+    padding: 30px;
     padding-top: 5vh;
     justify-content: center;
-    /* user-select: none; */
+    user-select: none;
 }
 
 .page-welcome container, .page-welcome-comfyui container, .page-welcome-complete container {
@@ -133,6 +146,30 @@ body page {
 
 .page-welcome container md-text-button, .page-welcome-comfyui container md-text-button, .page-welcome-complete container md-text-button {
     width: 100%;
+}
+
+.app-core {
+    display: flex;
+    height: calc(100% - 35px - 25px);
+}
+
+.app-core left-bar  {
+    display: flex;
+    overflow: auto;
+    overflow-x: hidden;
+    min-width: 50px;
+    flex-direction: column;
+    box-sizing: content-box;
+    padding-top: 0;
+    padding-left: 0;
+    margin-right: 0;
+}
+
+.app-core left-bar md-filled-icon-button, .app-core left-bar md-icon-button {
+    margin-top: 0;
+    min-width: 40px;
+    min-height: 40px;
+    margin: 5px;
 }
 
 page h1 {
@@ -146,4 +183,164 @@ page h1 md-icon {
     font-size: 40px;
     margin-right: 8px;
     color: var(--md-sys-color-primary);
+}
+
+.app-core container {
+    width: 100%;
+    padding-left: 30px;
+    padding-right: 30px;
+    height: 100%;
+    overflow: auto;
+    overflow-y: hidden;
+    position: relative;
+    border-radius: 1rem 0 0 1rem;
+    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
+}
+
+.app-core container {
+    flex-direction: column !important;
+}
+
+.app-core buttom-bar {
+    margin-top: auto;
+    display: flex;
+}
+
+.app-core iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 1rem 0 0 1rem;
+}
+
+.page-main container {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    border-radius: 1rem 0 0 1rem;
+    overflow: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.page-main container app-left {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    width: 35%;
+    margin: 20px;
+    align-items: stretch;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.page-main container app-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    padding: 0;
+    width: 65%;
+    margin: 20px;
+    margin-left: 20px;
+    margin-right: 0;
+    position: relative;
+}
+
+.page-main container app-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    border-radius: 1rem;
+    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
+}
+
+.app-core app-left md-outlined-select, .app-core app-left md-outlined-text-field, .app-core app-left md-slider {
+    width: 100% !important;
+}
+
+
+#model-list {
+    border-radius: 1rem;
+}
+
+bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 25px;
+    display: flex;
+    font-size: 12px;
+    line-height: 25px;
+    padding-left: 50px;
+    align-items: center;
+    user-select: none;
+    z-index: -99;
+}
+
+#app-core-bottom-bar span {
+    display: flex;
+    align-items: center;
+    margin-right: 5px;
+}
+
+#app-core-bottom-bar span md-icon {
+    font-size: 16px;
+}
+
+left-bar md-icon-button.active {
+    position: relative;
+    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
+    border-radius: 50%;
+
+}
+
+#page-container container.container-main {
+    display: flex;
+    flex-direction: row !important;
+}
+
+@media (max-width: 700px) {
+    #page-container container.container-main {
+        display: flex;
+        flex-direction: column !important;
+    }
+    
+    .page-main container app-left {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        width: 100%;
+        margin: 20px;
+        align-items: stretch;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .page-main container app-right {
+        width: 100%;
+        height: 100%;
+        min-height: 400px;
+        margin: 20px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+.app-core container {
+    user-select: none;
+}
+
+.app-core container h1 {
+    margin: 0;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    font-weight: normal;
+}
+
+.app-core container p {
+    margin: 0;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
