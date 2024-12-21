@@ -284,6 +284,7 @@ const loadApp = () => {
             $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
             $("#comfy-ui-load").value = 1;
             generateButton.disabled = false;
+            loadAppMain()
         } else {
             exec('wmic path win32_VideoController get name', (err, stdout, stderr) => {
                 if (err) {
@@ -303,6 +304,7 @@ const loadApp = () => {
                             $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
                             $("#comfy-ui-load").value = 1;
                             generateButton.disabled = false;
+                            loadAppMain()
                         }
 
                     });
@@ -322,392 +324,453 @@ const loadApp = () => {
         }
     });
 
-    // modelPath载入到列表中
-    const modelList = $(".container-model #model-list");
-    const modelPathE = $(".container-model #model-path");
-    const modelPathButton = $(".container-model #model-path-button");
-    const modelSelect = $("#app-core-image-generator #model-select");
+    const loadAppMain = () => {
 
-    modelPathE.value = modelPath;
-    fs.readdir(modelPath, (err, files) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        files.forEach(file => {
-            if (file !== 'put_checkpoints_here') {
-                const modelItem = document.createElement("md-list-item");
-                modelItem.innerHTML = `
-                    <md-icon selected slot="start">deployed_code</md-icon>
-                    <span>${file}</span>
-                    <md-text-button slot="end" onclick="deleteModel('${file}')">删除</md-text-button>
-                `;
-                modelList.appendChild(modelItem);
-                const modelOption = `
-                    <md-select-option value="${file}">
-                        <md-icon slot="start">deployed_code</md-icon>
-                        ${file.split('.')[0]}
-                    </md-select-option>
-                `;
-                modelSelect.insertAdjacentHTML('beforeend', modelOption);
-            }
-        });
+        // modelPath载入到列表中
+        const modelList = $(".container-model #model-list");
+        const modelPathE = $(".container-model #model-path");
+        const modelPathButton = $(".container-model #model-path-button");
+        const modelSelect = $("#app-core-image-generator #model-select");
 
-        modelSelect.value = files[0];
-
-    });
-
-    deleteModel = (file) => {
-            const dialog = document.createElement('md-dialog');
-            dialog.setAttribute('type', 'alert');
-            dialog.innerHTML = `
-                <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
-                <form slot="content" id="form-id" method="dialog">
-                    您确定要删除模型 “${file}” 吗？
-                </form>
-                <div slot="actions">
-                    <md-text-button form="form-id" value="cancel">取消</md-text-button>
-                    <md-text-button form="form-id" value="delete">删除</md-text-button>
-                </div>
-            `;
-            document.body.appendChild(dialog);
-        
-            dialog.addEventListener('close', () => {
-                if (dialog.returnValue === 'delete') {
-                    fs.unlink(path.join(modelPath, file), (err) => {
-                        if (err) {
-                            openDialog('error', '删除失败', '删除模型过程中发生错误。');
-                            return;
-                        }
-                        const modelItem = Array.from(modelList.children).find(item => item.querySelector('span').textContent === file);
-                        if (modelItem) {
-                            modelList.removeChild(modelItem);
-                        }
-                    });
-                }
-                document.body.removeChild(dialog);
-            });
-        
-            dialog.show();
-        }
-
-    modelPathButton.onclick = () => {
-        const command = 'explorer.exe ' + modelPathE.value;
-        exec(command, (err) => {
+        modelPathE.value = modelPath;
+        fs.readdir(modelPath, (err, files) => {
             if (err) {
-                console.error('Error opening file explorer:', err);
+                console.error(err);
+                return;
             }
-        });
-    }
+            files.forEach(file => {
+                if (file !== 'put_checkpoints_here') {
+                    const modelItem = document.createElement("md-list-item");
+                    modelItem.innerHTML = `
+                        <md-icon selected slot="start">deployed_code</md-icon>
+                        <span>${file}</span>
+                        <md-text-button slot="end" onclick="deleteModel('${file}')">删除</md-text-button>
+                    `;
+                    modelList.appendChild(modelItem);
+                    const modelOption = `
+                        <md-select-option value="${file}">
+                            <md-icon slot="start">deployed_code</md-icon>
+                            ${file.split('.')[0]}
+                        </md-select-option>
+                    `;
+                    modelSelect.insertAdjacentHTML('beforeend', modelOption);
+                }
+            });
 
-    const historyList = $(".container-history #history-list");
-    //fs获取historyPath中的文件，然后显示在historyList中
-    fs.readdir(historyPath, (err, files) => {
-        if (err) {
+            modelSelect.value = files[0];
+
+        });
+
+        //删除模型
+        deleteModel = (file) => {
+                const dialog = document.createElement('md-dialog');
+                dialog.setAttribute('type', 'alert');
+                dialog.innerHTML = `
+                    <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
+                    <form slot="content" id="form-id" method="dialog">
+                        您确定要删除模型 “${file}” 吗？
+                    </form>
+                    <div slot="actions">
+                        <md-text-button form="form-id" value="cancel">取消</md-text-button>
+                        <md-text-button form="form-id" value="delete">删除</md-text-button>
+                    </div>
+                `;
+                document.body.appendChild(dialog);
+            
+                dialog.addEventListener('close', () => {
+                    if (dialog.returnValue === 'delete') {
+                        fs.unlink(path.join(modelPath, file), (err) => {
+                            if (err) {
+                                openDialog('error', '删除失败', '删除模型过程中发生错误。');
+                                return;
+                            }
+                            const modelItem = Array.from(modelList.children).find(item => item.querySelector('span').textContent === file);
+                            if (modelItem) {
+                                modelList.removeChild(modelItem);
+                            }
+                        });
+                    }
+                    document.body.removeChild(dialog);
+                });
+            
+                dialog.show();
+            }
+
+        modelPathButton.onclick = () => {
+            const command = 'explorer.exe ' + modelPathE.value;
+            exec(command, (err) => {
+                if (err) {
+                    console.error('Error opening file explorer:', err);
+                }
+            });
+        }
+
+        const historyList = $(".container-history #history-list");
+
+        //fs获取historyPath中的文件，然后显示在historyList中
+        fs.readdir(historyPath, (err, files) => {
+            if (err) {
             console.error(err);
             return;
-        }
-        files.reverse().forEach(file => {
+            }
+            files.reverse().forEach(file => {
             if (file.endsWith('.png')) {
                 //创建 md-card 元素
                 const historyItem = document.createElement("md-card");
-                historyItem.className = 'ripple'
+                historyItem.className = 'ripple';
                 historyItem.innerHTML = `
+                    <md-checkbox></md-checkbox>
                     <md-ripple></md-ripple>
                     <img src="http://127.0.0.1:${port}/view?filename=${file}&type=output">
                 `;
                 historyItem.querySelector('img').addEventListener('click', () => {
-                    openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
+                openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
                 });
                 historyList.appendChild(historyItem);
             }
-        })
-    })
+            });
+        });
 
-    const openImageViewer = (imageUrl) => {
-        const viewer = document.createElement('div');
-        viewer.classList.add('image-viewer');
-        viewer.innerHTML = `
-            <div class="image-viewer-overlay"></div>
-            <div class="image-viewer-content">
-                <img src="${imageUrl}" alt="Image Viewer">
+        deleteHistoryItem = (file) => {
+            const dialog = document.createElement('md-dialog');
+            dialog.setAttribute('type', 'alert');
+            dialog.innerHTML = `
+            <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
+            <form slot="content" id="form-id" method="dialog">
+                您确定要删除历史记录 “${file}” 吗？
+            </form>
+            <div slot="actions">
+                <md-text-button form="form-id" value="cancel">取消</md-text-button>
+                <md-text-button form="form-id" value="delete">删除</md-text-button>
             </div>
-        `;
-        document.body.appendChild(viewer);
+            `;
+            document.body.appendChild(dialog);
 
-        // Add fade-in animation
-        viewer.style.opacity = 0;
-        viewer.style.transition = 'opacity 0.5s';
-        requestAnimationFrame(() => {
-            viewer.style.opacity = 1;
-        });
-
-        const overlay = viewer.querySelector('.image-viewer-overlay');
-        overlay.addEventListener('click', () => {
-            viewer.style.opacity = 0;
-            viewer.addEventListener('transitionend', () => {
-                document.body.removeChild(viewer);
-            }, { once: true });
-        });
-
-        const img = viewer.querySelector('img');
-        img.addEventListener('click', (event) => {
-            event.stopPropagation();
-        });
-    }
-
-    document.querySelectorAll('.container-history img').forEach(img => {
-        img.addEventListener('click', () => {
-            openImageViewer(img.src);
-        });
-    });
-
-    //图片生成逻辑
-
-    generateButton.onclick = () => {
-
-        //获取完整数据
-        const modelSelect = $("#app-core-image-generator #model-select");
-        const textField = $("#app-core-image-generator #prompt");
-        const sizeSelect = $("#app-core-image-generator #size-select");
-        const steps = $("#app-core-image-generator #setps-slider");
-        const batchSize = $("#app-core-image-generator #batch-size");
-
-        if(batchSize.value === '0') {
-            batchSize.value = 1;
-        }
-
-        if (steps.value === '0') {
-            steps.value = 20;
-        }
-
-        if (modelSelect.value === '') {
-            openDialog('error', '生成失败', '请选择一个模型。');
-            return;
-        }
-
-        if (textField.value === '') {
-            openDialog('error', '生成失败', '请输入一个提示词。');
-            return;
-        }
-
-        const model = modelSelect.value;
-        const prompt = textField.value;
-        const size = sizeSelect.value;
-        const seedValue = Math.floor(Math.random() * Math.pow(2, 64));
-        const stepsValue = steps.value;
-        const sizeValue = size.split('x');
-        const batchSizeValue = batchSize.value;
-
-        generateButton.disabled = true;
-        generateButton.textContent = "生成中...";
-
-        //创造向api请求的json, 由于使用的是 comfyUI，需要构造工作流
-        const data = {
-            "6": {
-              "inputs": {
-                "text": prompt,
-                "clip": [
-                  "30",
-                  1
-                ]
-              },
-              "class_type": "CLIPTextEncode",
-              "_meta": {
-                "title": "提示词"
-              }
-            },
-            "8": {
-              "inputs": {
-                "samples": [
-                  "31",
-                  0
-                ],
-                "vae": [
-                  "30",
-                  2
-                ]
-              },
-              "class_type": "VAEDecode",
-              "_meta": {
-                "title": "VAE解码"
-              }
-            },
-            "9": {
-              "inputs": {
-                "filename_prefix": "ComfyUI",
-                "images": [
-                  "8",
-                  0
-                ]
-              },
-              "class_type": "SaveImage",
-              "_meta": {
-                "title": "保存图像"
-              }
-            },
-            "27": {
-              "inputs": {
-                "width": sizeValue[0],
-                "height": sizeValue[1],
-                "batch_size": batchSizeValue
-              },
-              "class_type": "EmptySD3LatentImage",
-              "_meta": {
-                "title": "创建一个画布"
-              }
-            },
-            "30": {
-              "inputs": {
-                "ckpt_name": model
-              },
-              "class_type": "CheckpointLoaderSimple",
-              "_meta": {
-                "title": "载入模型"
-              }
-            },
-            "31": {
-              "inputs": {
-                "seed": seedValue,
-                "steps": stepsValue,
-                "cfg": 1,
-                "sampler_name": "euler",
-                "scheduler": "simple",
-                "denoise": 1,
-                "model": [
-                  "30",
-                  0
-                ],
-                "positive": [
-                  "6",
-                  0
-                ],
-                "negative": [
-                  "33",
-                  0
-                ],
-                "latent_image": [
-                  "27",
-                  0
-                ]
-              },
-              "class_type": "KSampler",
-              "_meta": {
-                "title": "生成"
-              }
-            },
-            "33": {
-              "inputs": {
-                "text": "",
-                "clip": [
-                  "30",
-                  1
-                ]
-              },
-              "class_type": "CLIPTextEncode",
-              "_meta": {
-                "title": "负面提升*"
-              }
+            dialog.addEventListener('close', () => {
+            if (dialog.returnValue === 'delete') {
+                fs.unlink(path.join(historyPath, file), (err) => {
+                if (err) {
+                    openDialog('error', '删除失败', '删除历史记录过程中发生错误。');
+                    return;
+                }
+                const historyItem = Array.from(historyList.children).find(item => item.querySelector('img').src.includes(file));
+                if (historyItem) {
+                    historyList.removeChild(historyItem);
+                }
+                });
             }
+            document.body.removeChild(dialog);
+            });
+
+            dialog.show();
         };
 
-        fetch(`http://127.0.0.1:${port}/prompt`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                client_id: 'ComfyUI',
-                prompt: data
-            })
-        })
-        .catch(err => {
-            openDialog('error', '生成失败', '生成过程中发生错误。');
+        selectHistoryItem = (file) => {
+            const selectedImage = `http://127.0.0.1:${port}/view?filename=${file}&type=output`;
+            openImageViewer(selectedImage);
+        };
+
+        const openImageViewer = (imageUrl) => {
+            const viewer = document.createElement('div');
+            viewer.classList.add('image-viewer');
+            viewer.innerHTML = `
+                <div class="image-viewer-overlay"></div>
+                <div class="image-viewer-content">
+                    <img src="${imageUrl}" alt="Image Viewer">
+                    <md-icon-button class="image-viewer-download">
+                        <md-icon>download</md-icon>
+                    </md-icon-button>
+                </div>
+            `;
+            document.body.appendChild(viewer);
+
+            viewer.style.opacity = 0;
+            viewer.style.transition = 'opacity 0.25s';
+            requestAnimationFrame(() => {
+                viewer.style.opacity = 1;
+            });
+
+            const overlay = viewer.querySelector('.image-viewer-overlay');
+            overlay.addEventListener('click', () => {
+                viewer.style.opacity = 0;
+                viewer.addEventListener('transitionend', () => {
+                    document.body.removeChild(viewer);
+                }, { once: true });
+            });
+
+            const img = viewer.querySelector('img');
+            img.addEventListener('click', (event) => {
+                event.stopPropagation();
+                if (img.classList.contains('zoomed')) {
+                    img.classList.remove('zoomed');
+                } else {
+                    img.classList.add('zoomed');
+                }
+            });
+
+            const downloadButton = viewer.querySelector('.image-viewer-download');
+
+            downloadButton.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.href = imageUrl;
+                link.download = imageUrl.split('/').pop();
+                link.click();
+            });
+        }
+
+        document.querySelectorAll('.container-history img').forEach(img => {
+            img.addEventListener('click', () => {
+                openImageViewer(img.src);
+            });
         });
 
-        const ws = new WebSocket(`ws://127.0.0.1:${port}/ws?clientId=ComfyUI`);
+        //图片生成逻辑
 
-        ws.onopen = () => {
-            console.log('WebSocket opened.');
-        }
+        generateButton.onclick = () => {
 
-        const progressBar = $("#app-core-image-generator #progress-bar");
+            //获取完整数据
+            const modelSelect = $("#app-core-image-generator #model-select");
+            const textField = $("#app-core-image-generator #prompt");
+            const sizeSelect = $("#app-core-image-generator #size-select");
+            const steps = $("#app-core-image-generator #setps-slider");
+            const batchSize = $("#app-core-image-generator #batch-size");
 
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'progress') {
-                progressBar.value = data.data.value;
-                progressBar.max = data.data.max;
+            if(batchSize.value === '0') {
+                batchSize.value = 1;
             }
 
-            if (data.type === 'status') {
-                const queueRemaining = data.data.status.exec_info.queue_remaining;
-                console.log(`Queue remaining: ${queueRemaining}`);
+            if (steps.value === '0') {
+                steps.value = 20;
             }
 
-            if (data.type === 'execution_start') {
-                const promptId = data.data.prompt_id;
-                console.log(`Execution started for prompt ${promptId}`);
+            if (modelSelect.value === '') {
+                openDialog('error', '生成失败', '请选择一个模型。');
+                return;
             }
 
-            if (data.type === 'executing') {
-                const node = data.data.node;
-                const promptId = data.data.prompt_id;
-                console.log(`Executing node ${node} for prompt ${promptId}`);
-                
-                if (node === null) {
-                    const promptId = data.data.prompt_id;
-                    fetch(`http://127.0.0.1:${port}/history/${promptId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log(data);
+            if (textField.value === '') {
+                openDialog('error', '生成失败', '请输入一个提示词。');
+                return;
+            }
 
-                            if(data[promptId].outputs == null) {
-                                openDialog('error', '生成失败', '生成失败，ComfyUI 发生错误。');
-                                console.log('No output images found.');
-                                return;
-                            }
+            const model = modelSelect.value;
+            const prompt = textField.value;
+            const size = sizeSelect.value;
+            const seedValue = Math.floor(Math.random() * Math.pow(2, 64));
+            const stepsValue = steps.value;
+            const sizeValue = size.split('x');
+            const batchSizeValue = batchSize.value;
 
-                            const images = data[promptId].outputs['9'].images;
-                            const imageUrls = [];
+            generateButton.disabled = true;
+            generateButton.textContent = "生成中...";
 
-                            for (const image of images) {
-                                let fileName = image.filename;
-                                let imageUrl = `http://127.0.0.1:${port}/view?filename=${fileName}&type=output`;
-                                imageUrls.push(imageUrl);
-                            }
-
-                            for (const imageUrl of imageUrls) {
-                                const image = document.createElement('img');
-                                image.src = imageUrl;
-                                image.addEventListener('click', () => {
-                                    openImageViewer(imageUrl);
-                                });
-                                const imageContainer = $("#app-core-image-viewer");
-                                imageContainer.appendChild(image);
-                            }
-                            // Scroll the image container to the bottom
-                            const imageContainer = $("#app-core-image-viewer");
-                            imageContainer.scrollTop = imageContainer.scrollHeight;
-
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            openDialog('error', '生成失败', '生成过程中发生错误。');
-                        });
-    
-                    generateButton.textContent = "生成";
-                    generateButton.disabled = false;
-
+            //创造向api请求的json, 由于使用的是 comfyUI，需要构造工作流
+            const data = {
+                "6": {
+                "inputs": {
+                    "text": prompt,
+                    "clip": [
+                    "30",
+                    1
+                    ]
+                },
+                "class_type": "CLIPTextEncode",
+                "_meta": {
+                    "title": "提示词"
                 }
+                },
+                "8": {
+                "inputs": {
+                    "samples": [
+                    "31",
+                    0
+                    ],
+                    "vae": [
+                    "30",
+                    2
+                    ]
+                },
+                "class_type": "VAEDecode",
+                "_meta": {
+                    "title": "VAE解码"
+                }
+                },
+                "9": {
+                "inputs": {
+                    "filename_prefix": "ComfyUI",
+                    "images": [
+                    "8",
+                    0
+                    ]
+                },
+                "class_type": "SaveImage",
+                "_meta": {
+                    "title": "保存图像"
+                }
+                },
+                "27": {
+                "inputs": {
+                    "width": sizeValue[0],
+                    "height": sizeValue[1],
+                    "batch_size": batchSizeValue
+                },
+                "class_type": "EmptySD3LatentImage",
+                "_meta": {
+                    "title": "创建一个画布"
+                }
+                },
+                "30": {
+                "inputs": {
+                    "ckpt_name": model
+                },
+                "class_type": "CheckpointLoaderSimple",
+                "_meta": {
+                    "title": "载入模型"
+                }
+                },
+                "31": {
+                "inputs": {
+                    "seed": seedValue,
+                    "steps": stepsValue,
+                    "cfg": 1,
+                    "sampler_name": "euler",
+                    "scheduler": "simple",
+                    "denoise": 1,
+                    "model": [
+                    "30",
+                    0
+                    ],
+                    "positive": [
+                    "6",
+                    0
+                    ],
+                    "negative": [
+                    "33",
+                    0
+                    ],
+                    "latent_image": [
+                    "27",
+                    0
+                    ]
+                },
+                "class_type": "KSampler",
+                "_meta": {
+                    "title": "生成"
+                }
+                },
+                "33": {
+                "inputs": {
+                    "text": "",
+                    "clip": [
+                    "30",
+                    1
+                    ]
+                },
+                "class_type": "CLIPTextEncode",
+                "_meta": {
+                    "title": "负面提升*"
+                }
+                }
+            };
+
+            fetch(`http://127.0.0.1:${port}/prompt`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    client_id: 'ComfyUI',
+                    prompt: data
+                })
+            })
+            .catch(err => {
+                openDialog('error', '生成失败', '生成过程中发生错误。');
+            });
+
+            const ws = new WebSocket(`ws://127.0.0.1:${port}/ws?clientId=ComfyUI`);
+
+            ws.onopen = () => {
+                console.log('WebSocket opened.');
             }
-            
-        }
 
+            const progressBar = $("#app-core-image-generator #progress-bar");
 
-    }
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'progress') {
+                    progressBar.value = data.data.value;
+                    progressBar.max = data.data.max;
+                }
+
+                if (data.type === 'status') {
+                    const queueRemaining = data.data.status.exec_info.queue_remaining;
+                    console.log(`Queue remaining: ${queueRemaining}`);
+                }
+
+                if (data.type === 'execution_start') {
+                    const promptId = data.data.prompt_id;
+                    console.log(`Execution started for prompt ${promptId}`);
+                }
+
+                if (data.type === 'executing') {
+                    const node = data.data.node;
+                    const promptId = data.data.prompt_id;
+                    console.log(`Executing node ${node} for prompt ${promptId}`);
+                    
+                    if (node === null) {
+                        const promptId = data.data.prompt_id;
+                        fetch(`http://127.0.0.1:${port}/history/${promptId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data);
+
+                                if(data[promptId].outputs == null) {
+                                    openDialog('error', '生成失败', '生成失败，ComfyUI 发生错误。');
+                                    console.log('No output images found.');
+                                    return;
+                                }
+
+                                const images = data[promptId].outputs['9'].images;
+                                const imageUrls = [];
+
+                                for (const image of images) {
+                                    let fileName = image.filename;
+                                    let imageUrl = `http://127.0.0.1:${port}/view?filename=${fileName}&type=output`;
+                                    imageUrls.push(imageUrl);
+                                }
+
+                                for (const imageUrl of imageUrls) {
+                                    const image = document.createElement('img');
+                                    image.src = imageUrl;
+                                    image.addEventListener('click', () => {
+                                        openImageViewer(imageUrl);
+                                    });
+                                    const imageContainer = $("#app-core-image-viewer");
+                                    imageContainer.appendChild(image);
+                                }
+
+                                // Scroll the image container to the bottom
+                                const imageContainer = $("#app-core-image-viewer");
+                                imageContainer.scrollTop = imageContainer.scrollHeight;
+
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                openDialog('error', '生成失败', '生成过程中发生错误。');
+                            });
         
+                        generateButton.textContent = "生成";
+                        generateButton.disabled = false;
 
+                    }
+                }
+                
+            }
+
+
+        }
+        
+    }
 
 }
 
