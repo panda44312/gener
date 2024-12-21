@@ -434,7 +434,7 @@ details > summary::-webkit-details-marker {
 
 #history-list md-card, #app-core-image-viewer md-card {
     width: 100%;
-    height: 100%;
+    height: max-content;
     overflow: hidden;
     display: flex;
     align-items: center;
