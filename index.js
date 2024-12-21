@@ -381,49 +381,49 @@ const loadApp = () => {
                 checkbox.addEventListener('change', updateSelectAllCheckboxState);
             });
         });
-    }
 
-    generateUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    };
-
-    deleteHistoryItem = (files) => {
-        try {
-            files.forEach(file => {
-                fs.unlinkSync(path.join(historyPath, file));
-                const historyItem = Array.from(historyList.children).find(item => item.querySelector('img').src.includes(file));
-                if (historyItem) {
-                    historyList.removeChild(historyItem);
-                }
+        generateUUID = () => {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
             });
-            updateSelectAllCheckboxState();
-        } catch (err) {
-            openDialog('error', '删除失败', '删除历史记录过程中发生错误。');
-            console.error(err);
-        }
-    };
-
-    updateSelectAllCheckboxState = () => {
-        const checkboxes = historyList.querySelectorAll('md-checkbox');
-        const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
-        const selectAllCheckbox = $(`.container-history-floating-menu #select-all`);
-        if (checkedCheckboxes.length === 0) {
-        selectAllCheckbox.checked = false;
-        selectAllCheckbox.indeterminate = false;
-        historyList.classList.remove('checked');
-        } else if (checkedCheckboxes.length === checkboxes.length) {
-        selectAllCheckbox.checked = true;
-        selectAllCheckbox.indeterminate = false;
-        historyList.classList.add('checked');
-        } else {
-        selectAllCheckbox.checked = false;
-        selectAllCheckbox.indeterminate = true;
-        historyList.classList.add('checked');
-        }
-    };
+        };
+    
+        deleteHistoryItem = (files) => {
+            try {
+                files.forEach(file => {
+                    fs.unlinkSync(path.join(historyPath, file));
+                    const historyItem = Array.from(historyList.children).find(item => item.querySelector('img').src.includes(file));
+                    if (historyItem) {
+                        historyList.removeChild(historyItem);
+                    }
+                });
+                updateSelectAllCheckboxState();
+            } catch (err) {
+                openDialog('error', '删除失败', '删除历史记录过程中发生错误。');
+                console.error(err);
+            }
+        };
+    
+        updateSelectAllCheckboxState = () => {
+            const checkboxes = historyList.querySelectorAll('md-checkbox');
+            const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+            const selectAllCheckbox = $(`.container-history-floating-menu #select-all`);
+            if (checkedCheckboxes.length === 0) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+            historyList.classList.remove('checked');
+            } else if (checkedCheckboxes.length === checkboxes.length) {
+            selectAllCheckbox.checked = true;
+            selectAllCheckbox.indeterminate = false;
+            historyList.classList.add('checked');
+            } else {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = true;
+            historyList.classList.add('checked');
+            }
+        };
+    }
     
 
     loadAppMain = () => {
