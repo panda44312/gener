@@ -10,7 +10,9 @@
         transition: opacity 0.5s;
       }
     </style>
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    
     <script type="importmap">
       {
         "imports": {
@@ -24,10 +26,13 @@
   
       document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
     </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
     <link href="./index.css" rel="stylesheet" crossorigin="anonymous">
+    
   <body>
 
     <top-bar>
@@ -66,8 +71,8 @@
 
       <page class="active page-main app-core">
 
-        <!-- 构建基本ai生图软件的界面，历史记录，提示词等 -->
         <left-bar>
+
             <md-icon-button id="home-button" onclick='switchContainer("#home-button", "container-main");'>
               <md-icon>home</md-icon>
             </md-icon-button>
@@ -96,12 +101,7 @@
           <app-left id="app-core-image-generator">
 
             <p>
-              <md-outlined-select label="模型" outlined value="flux1-dev-fp8.safetensors" id="model-select">
-                <md-select-option selected value="flux1-dev-fp8.safetensors">
-                  <md-icon slot="start">deployed_code</md-icon>
-                  flux1-dev-fp8
-                </md-select-option>
-              </md-outlined-select>
+              <md-outlined-select label="模型" outlined id="model-select"></md-outlined-select>
             </p>
 
             <p>
@@ -118,39 +118,34 @@
                 <md-select-option value="768x1024" ><md-icon slot="start">crop_free</md-icon>3:4 (768x1024)</md-select-option>
               </md-outlined-select>
             </p>
-            <p>
-              <md-outlined-text-field type="number" label="生成批次" id="batch-size" value="1"></md-outlined-text-field>
-            </p>
             <p style="display: flex;">
-              <md-slider id="setps-slider" min="1" max="30" step="1" value="20" discrete label="Setps" oninput="
-                $('#app-core-image-generator #setps-slider-show').value = $('#app-core-image-generator #setps-slider').value;
-              "></md-slider>
+              <md-outlined-text-field type="number" label="单次生成批次" id="batch-size" value="1"  style="margin-right: 10px;"></md-outlined-text-field>
+              <md-outlined-text-field type="number" label="生成批次" id="batch-size-a" value="1"   style="margin-left: 10px;"></md-outlined-text-field>
 
-              <md-outlined-text-field type="number" label="步数" disabled id="setps-slider-show" style="width: 70px; min-width: 70px;" value="20"></md-outlined-text-field>
+            </p>
+            <p>
+              <md-outlined-text-field type="number" label="步数" id="setps-slider" value="20"></md-outlined-text-field>
             </p>
             <p>
               <md-linear-progress id="progress-bar" value="0" max="100"></md-linear-progress>
             </p>
 
             <p>
-              <md-text-button id="generate-button">生成</md-text-button>
+              <md-text-button disabled="true" id="generate-button">生成</md-text-button>
             </p>
           </app-left>
 
-          <app-right id="app-core-image-viewer">
-          </app-left>
+          <app-right id="app-core-image-viewer"></app-left>
 
         </container>
 
         <container class="container-history" style="display: none;">
           <h1>历史记录</h1>
-          <p>这里可以查看生成的图片，下载图片，删除图片等。</p>
-          <md-list id="history-list"></md-list>
+          <div id="history-list"></div>
         </container>
 
         <container class="container-model" style="display: none;">
           <h1>模型文件管理</h1>
-          <p>这里可以管理模型，下载模型，删除模型等。</p>
           <p style="margin: 0; display: flex; align-items: center;">
             <span style="display: block; width: 80px;">路径：</span>
             <md-outlined-text-field disabled="true" id="model-path" style="zoom: 60%; width: 100%;"></md-outlined-text-field>
@@ -164,7 +159,6 @@
 
         <container class="container-download" style="display: none;">
           <h1>模型下载</h1>
-          <p>这里可以下载 Flux 的模型。</p>
           <md-list id="model-list">
             <md-list-item>
               <md-list-item-text>Flux1 (dev) fp8</md-list-item-text>
@@ -182,30 +176,33 @@
         <iframe    class="container-comfyui-web" style="display: none;" src="http://127.0.0.1:8190"></iframe>
 
         <container class="container-settings" style="display: none;">
-          <h1>关于</h1>
-          <p>Gener 是一款桌面上的AI绘图（ComfyUI）的图形界面应用，你可以使用 Gener 来文生图、图生图，以及更多...</p>
-          <p>信息：</p>
-          <p>版本号：0.0.1</p>
+          <h1>设置</h1>
+          <p>
+            <md-outlined-text-field type="number" label="端口" id="port" value="8190"></md-outlined-text-field>
+          </p>
         </container>
 
       </page>
       
       <bottom-bar id="app-core-bottom-bar">
         <span>
+          <md-circular-progress value="0.25" id="comfy-ui-load"></md-circular-progress>
+        </span>
+        <span>
           <md-icon>computer</md-icon>
-          <span id="cpu-load">0%</span>
+          <span id="cpu-load"></span>
         </span>
         <span>
           <md-icon>memory</md-icon>
-          <span id="memory-usage">0GB/0GB</span>
+          <span id="memory-usage"></span>
         </span>
         <span>
           <md-icon id="mode_fan">mode_fan</md-icon>
-          <span id="gpu-load">0%</span>
+          <span id="gpu-load"></span>
         </span>
         <span>
           <md-icon>memory</md-icon>
-          <span id="gpu-memory-used">0GB/0GB</span>
+          <span id="gpu-memory-used"></span>
         </span>
       </bottom-bar>
 

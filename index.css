@@ -22,20 +22,33 @@ body {
     background-color: rgb(var(--md-sys-color-primary-o), 0.1);
 }
 
+
 @media (prefers-color-scheme: dark) {
     :root {
         --app-color: #ffffff;
         --app-bg: #222222;
+        --md-sys-color-on-surface: #ffffff;
         --md-sys-color-background: #222222;
         --md-icon-button-icon-color: #ffffff;
-        --md-icon-button-disabled-icon-color: #484848;
         --md-icon-button-hover-icon-color: #ffffff;
         --md-icon-button-focus-icon-color: #ffffff;
-        --md-icon-button-hover-state-layer-color: #ffffff;
-        --md-icon-button-pressed-state-layer-color: #ffffff;
         --md-icon-button-pressed-icon-color: #ffffff;
         --md-outlined-text-field-input-text-color: #ffffff;
+        --md-outlined-field-content-font-color: #ffffff;
+        --md-outlined-select-text-field-trailing-icon-color: #ffffff;
+        --md-menu-container-color: rgb(33, 33, 33);
+        --md-menu-item-selected-container-color: rgb(var(--md-sys-color-primary-o), 0.3);
+        --md-linear-progress-track-color: #ffffff15;
     }
+
+    .page-main container app-right {
+        background-color: rgb(var(--md-sys-color-primary-o), 0.05) !important;
+    }
+    
+    container md-icon {
+        color: rgb(var(--md-sys-color-primary-o));
+    }
+
 }
 
 top-bar {
@@ -60,12 +73,6 @@ top-bar {
     right-btn .remove {
         display: none;
     }
-}
-
-
-.dark-mode {
-    background-color: #181818;
-    color: #fff;
 }
 
 top-bar md-icon svg {
@@ -239,19 +246,19 @@ page h1 md-icon {
 
 .page-main container app-right {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 5px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     padding: 0;
     width: 65%;
-    margin: 20px;
+    margin: 10px;
     margin-left: 20px;
-    margin-right: 0;
+    margin-right: -10px;
     position: relative;
     background-color: rgb(var(--md-sys-color-primary-o), 0.1);
     border-radius: 1rem;
     overflow: auto;
-    padding: 20px;
-    padding-right: 16px;
+    padding: 10px;
+    padding-right: 10px;
 }
 
 .page-main container app-card {
@@ -329,7 +336,7 @@ left-bar md-icon-button.active {
     }
     
     .page-main container app-right {
-        width: 100%;
+        width: calc(100% - 40px);
         height: 100%;
         min-height: 500px;
         margin: 20px;
@@ -345,7 +352,7 @@ left-bar md-icon-button.active {
 .app-core container h1 {
     margin: 0;
     margin-top: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     font-weight: normal;
 }
 
@@ -374,5 +381,106 @@ details > summary::-webkit-details-marker {
     width: 100%;
     height: auto;
     border-radius: 1rem;
-    margin-top: 20px;
 }
+
+#history-list {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    row-gap: 10px;
+    padding: 0;
+    margin: 0;
+    border-radius: 1rem;
+    background: 0;
+}
+
+@media (max-width: 500px) {
+    #history-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 501px) and (max-width: 800px) {
+    #history-list {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (min-width: 800px) {
+    #history-list {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+@media (min-width: 900px) {
+    #history-list {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
+}
+
+
+#history-list md-card {
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    border-radius: 1rem;
+}
+
+#history-list md-card img {
+    width: 100%;
+    /* height: 400px; */
+    /* overflow-clip-margin: content-box; */
+    /* overflow: auto; */
+    /* max-height: 500px; */
+    margin: auto;
+    border-radius: 1rem;
+    margin: 0;
+}
+
+md-circular-progress#comfy-ui-load {
+    width: 24px;
+    height: 24px;
+}
+
+.ripple {
+    position: relative;
+}
+
+.image-viewer {
+    position: fixed;
+    z-index: 110;
+    background: #262626e8;
+    left: 0;
+    top: 35px;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+}
+
+.image-viewer img {
+    display: block;
+    -webkit-user-select: none;
+    margin: auto;
+    cursor: zoom-in;
+    transition: background-color 300ms;
+    width: min-content;
+    height: min-content;
+    max-height: 90vh;
+    max-width: 90vw;
+    border-radius: 1rem;
+}
+
+.image-viewer .image-viewer-overlay {
+    position: fixed;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+}
+
+img {}

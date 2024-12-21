@@ -19,13 +19,16 @@ let   userDataPath;
 let   comfyUIPath;
 let   modelPath;
 let comfyUIPathPython;
+let historyPath;
 
 ipcRenderer.on('userDataPath', (event, configPath) => {
      userDataPath = configPath;
      comfyUIPath = path.join(userDataPath, './ComfyUI');
      comfyUIPathPython = path.join(userDataPath, './ComfyUI/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable');
      modelPath = path.join(comfyUIPath, '/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/models/checkpoints');
-});
+     historyPath = path.join(comfyUIPath, '/ComfyUI_windows_portable_nvidia/ComfyUI_windows_portable/ComfyUI/output');
+
+    });
 
 const $ = selector => {
     return document.querySelector(selector);
@@ -194,7 +197,8 @@ const loadApp = () => {
     switchContainer("#home-button", "container-main"); // 切换到ComfyUI页面
 
     //创建子线程，以显示cpu和内存使用情况
-    const cpu = setInterval(() => {
+    const sysinfo = () => {
+
         const AppBottomBar = $("#app-core-bottom-bar");
 
         exec('wmic cpu get loadpercentage', (err, stdout) => {
@@ -217,7 +221,7 @@ const loadApp = () => {
             const usedMemory = totalMemory - freeMemory;
             const hardwareReservedMemory = 1024 * 1024 * 1024; // 1GB reserved for hardware
             const adjustedUsedMemory = usedMemory + hardwareReservedMemory;
-            const memoryUsage = `${(adjustedUsedMemory / (1024 * 1024 * 1024)).toFixed(1)}GB/${(totalMemory / (1024 * 1024 * 1024)).toFixed(1)}GB`;
+            const memoryUsage = `${(adjustedUsedMemory / (1024 * 1024 * 1024)).toFixed(1)} GB/${(totalMemory / (1024 * 1024 * 1024)).toFixed(1)} GB`;
             AppBottomBar.querySelector('#memory-usage').textContent = memoryUsage;
         });
 
@@ -240,11 +244,15 @@ const loadApp = () => {
             const lines = stdout.split('\n');
             const usedMemory = parseInt(lines[0].split(',')[0]) * 1024 * 1024; // Convert to bytes
             const totalMemory = parseInt(lines[0].split(',')[1]) * 1024 * 1024; // Convert to bytes
-            const memoryUsage = `${(usedMemory / (1024 * 1024 * 1024)).toFixed(1)}GB/${(totalMemory / (1024 * 1024 * 1024)).toFixed(1)}GB`;
+            const memoryUsage = `${(usedMemory / (1024 * 1024 * 1024)).toFixed(1)} GB/${(totalMemory / (1024 * 1024 * 1024)).toFixed(1)} GB`;
             AppBottomBar.querySelector('#gpu-memory-used').textContent = memoryUsage;
+
         });
 
-    }, 1000);
+    }
+
+    sysinfo();
+    setInterval(sysinfo, 1000);
 
 
     // 检测用户是否有显卡
@@ -268,10 +276,14 @@ const loadApp = () => {
         req.end();
     };
 
+    const generateButton = $("#app-core-image-generator #generate-button");
+
     checkServer(port, (isRunning) => {
         if (isRunning) {
             console.log(`Server is already running on port ${port}.`);
             $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
+            $("#comfy-ui-load").value = 1;
+            generateButton.disabled = false;
         } else {
             exec('wmic path win32_VideoController get name', (err, stdout, stderr) => {
                 if (err) {
@@ -281,30 +293,29 @@ const loadApp = () => {
                 if (stdout.includes("NVIDIA")) {
                     console.log("NVIDIA显卡检测通过。");
                     const command = `"${path.join(comfyUIPathPython, 'python_embeded/python.exe')}" -s ${path.join(comfyUIPathPython, 'ComfyUI/main.py')} --port ${port}  `;
-                    comfyUIProcess = exec(command, (err, stdout, stderr) => {
-                        if (err) {
+                    comfyUIProcess = exec(command);
+                    comfyUIProcess.stderr.on('data', (data) => {
+                        console.log(`stderr: ${data}`);
+
+                        console.log(`stdout: ${data}`);
+                        if (data.includes(`To see the GUI go to: http://127.0.0.1:${port}`)) {
+                            console.log(`To see the GUI go to: http://127.0.0.1:${port}（注意，进程未退出）`);
+                            $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
+                            $("#comfy-ui-load").value = 1;
+                            generateButton.disabled = false;
+                        }
+
+                    });
+                    comfyUIProcess.on('close', (code) => {
+                        if (code !== 0) {
                             openDialog('error', '启动失败', 'ComfyUI启动失败。');
                         } else {
                             console.log("ComfyUI started successfully with NVIDIA GPU.");
-                            
-                            $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
-                            console.log(stdout);
                         }
                     });
                 } else {
                     openDialog('error', '显卡检测失败', '检测到您的电脑没有NVIDIA显卡，ComfyUI将使用CPU运行，速度可能会较慢。');
                     console.log("No NVIDIA GPU detected. Starting with CPU...");
-                    const command = `"${path.join(comfyUIPathPython, 'python_embeded/python.exe')}" -s ${path.join(comfyUIPathPython, 'ComfyUI/main.py')} --port ${port} --cpu`;
-                    comfyUIProcess = exec(command, (err, stdout, stderr) => {
-                        if (err) {
-                            openDialog('error', '启动失败', 'ComfyUI启动失败。');
-                        } else {
-                            console.log("ComfyUI started successfully with CPU.");
-                            
-                            $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
-                            console.log(stdout);
-                        }
-                    });
                 }
             });
 
@@ -315,7 +326,7 @@ const loadApp = () => {
     const modelList = $(".container-model #model-list");
     const modelPathE = $(".container-model #model-path");
     const modelPathButton = $(".container-model #model-path-button");
-    const modelUploadButton = $(".container-model #model-upload");
+    const modelSelect = $("#app-core-image-generator #model-select");
 
     modelPathE.value = modelPath;
     fs.readdir(modelPath, (err, files) => {
@@ -327,13 +338,23 @@ const loadApp = () => {
             if (file !== 'put_checkpoints_here') {
                 const modelItem = document.createElement("md-list-item");
                 modelItem.innerHTML = `
-                    <md-icon slot="start">deployed_code</md-icon>
+                    <md-icon selected slot="start">deployed_code</md-icon>
                     <span>${file}</span>
                     <md-text-button slot="end" onclick="deleteModel('${file}')">删除</md-text-button>
                 `;
                 modelList.appendChild(modelItem);
+                const modelOption = `
+                    <md-select-option value="${file}">
+                        <md-icon slot="start">deployed_code</md-icon>
+                        ${file.split('.')[0]}
+                    </md-select-option>
+                `;
+                modelSelect.insertAdjacentHTML('beforeend', modelOption);
             }
         });
+
+        modelSelect.value = files[0];
+
     });
 
     deleteModel = (file) => {
@@ -379,8 +400,69 @@ const loadApp = () => {
         });
     }
 
+    const historyList = $(".container-history #history-list");
+    //fs获取historyPath中的文件，然后显示在historyList中
+    fs.readdir(historyPath, (err, files) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        files.reverse().forEach(file => {
+            if (file.endsWith('.png')) {
+                //创建 md-card 元素
+                const historyItem = document.createElement("md-card");
+                historyItem.className = 'ripple'
+                historyItem.innerHTML = `
+                    <md-ripple></md-ripple>
+                    <img src="http://127.0.0.1:${port}/view?filename=${file}&type=output">
+                `;
+                historyItem.querySelector('img').addEventListener('click', () => {
+                    openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
+                });
+                historyList.appendChild(historyItem);
+            }
+        })
+    })
+
+    const openImageViewer = (imageUrl) => {
+        const viewer = document.createElement('div');
+        viewer.classList.add('image-viewer');
+        viewer.innerHTML = `
+            <div class="image-viewer-overlay"></div>
+            <div class="image-viewer-content">
+                <img src="${imageUrl}" alt="Image Viewer">
+            </div>
+        `;
+        document.body.appendChild(viewer);
+
+        // Add fade-in animation
+        viewer.style.opacity = 0;
+        viewer.style.transition = 'opacity 0.5s';
+        requestAnimationFrame(() => {
+            viewer.style.opacity = 1;
+        });
+
+        const overlay = viewer.querySelector('.image-viewer-overlay');
+        overlay.addEventListener('click', () => {
+            viewer.style.opacity = 0;
+            viewer.addEventListener('transitionend', () => {
+                document.body.removeChild(viewer);
+            }, { once: true });
+        });
+
+        const img = viewer.querySelector('img');
+        img.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+    }
+
+    document.querySelectorAll('.container-history img').forEach(img => {
+        img.addEventListener('click', () => {
+            openImageViewer(img.src);
+        });
+    });
+
     //图片生成逻辑
-    const generateButton = $("#app-core-image-generator #generate-button");
 
     generateButton.onclick = () => {
 
@@ -399,20 +481,20 @@ const loadApp = () => {
             steps.value = 20;
         }
 
-        if (textField.value === '') {
-            openDialog('error', '生成失败', '请输入一个提示词。');
+        if (modelSelect.value === '') {
+            openDialog('error', '生成失败', '请选择一个模型。');
             return;
         }
 
-        if (modelSelect.value === '') {
-            openDialog('error', '生成失败', '请选择一个模型。');
+        if (textField.value === '') {
+            openDialog('error', '生成失败', '请输入一个提示词。');
             return;
         }
 
         const model = modelSelect.value;
         const prompt = textField.value;
         const size = sizeSelect.value;
-        const seedValue = Math.floor(Math.random() * Math.pow(2, 32));
+        const seedValue = Math.floor(Math.random() * Math.pow(2, 64));
         const stepsValue = steps.value;
         const sizeValue = size.split('x');
         const batchSizeValue = batchSize.value;
@@ -598,13 +680,20 @@ const loadApp = () => {
                             for (const imageUrl of imageUrls) {
                                 const image = document.createElement('img');
                                 image.src = imageUrl;
+                                image.addEventListener('click', () => {
+                                    openImageViewer(imageUrl);
+                                });
                                 const imageContainer = $("#app-core-image-viewer");
                                 imageContainer.appendChild(image);
                             }
+                            // Scroll the image container to the bottom
+                            const imageContainer = $("#app-core-image-viewer");
+                            imageContainer.scrollTop = imageContainer.scrollHeight;
+
                         })
                         .catch(err => {
                             console.error(err);
-                            openDialog('error', '生成失败', '获取生成历史过程中发生错误。');
+                            openDialog('error', '生成失败', '生成过程中发生错误。');
                         });
     
                     generateButton.textContent = "生成";
