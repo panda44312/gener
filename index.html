@@ -88,7 +88,7 @@
             <md-icon-button id="comfyui-web-button" onclick='switchContainer("#comfyui-web-button", "container-comfyui-web");'>
              <md-icon>build</md-icon>
             </md-icon-button>
-            <md-icon-button id="refresh-button" onclick='switchContainer("#comfyui-web-button", "container-comfyui-web"); document.querySelector(".container-comfyui-web").src = `http://127.0.0.1:${port}`;' style="margin-top: auto;">
+            <md-icon-button id="refresh-button" onclick='loadAppMain(); document.querySelector(".container-comfyui-web").src = `http://127.0.0.1:${port}`;' style="margin-top: auto;">
               <md-icon>refresh</md-icon>
             </md-icon-button>
             <md-icon-button id="settings-button" onclick='switchContainer("#settings-button", "container-settings");'>
@@ -119,7 +119,7 @@
               </md-outlined-select>
             </p>
             <p style="display: flex;">
-              <md-outlined-text-field type="number" label="单次生成批次" id="batch-size" value="1"  style="margin-right: 10px;"></md-outlined-text-field>
+              <md-outlined-text-field type="number" label="单次生成个数" id="batch-size" value="1"  style="margin-right: 10px;"></md-outlined-text-field>
               <md-outlined-text-field type="number" label="生成批次" id="batch-size-a" value="1"   style="margin-left: 10px;"></md-outlined-text-field>
 
             </p>

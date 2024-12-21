@@ -324,13 +324,83 @@ const loadApp = () => {
         }
     });
 
-    const loadAppMain = () => {
+    loadHistory = () => {
+        const historyList = $(".container-history #history-list");
+        historyList.innerHTML = ``;
+
+        //fs获取historyPath中的文件，然后显示在historyList中
+        fs.readdir(historyPath, (err, files) => {
+            if (err) {
+            console.error(err);
+            return;
+            }
+            files.reverse().forEach(file => {
+            if (file.endsWith('.png')) {
+                //创建 md-card 元素
+                const historyItem = document.createElement("md-card");
+                historyItem.className = 'ripple';
+                historyItem.innerHTML = `
+                    <md-checkbox></md-checkbox>
+                    <md-ripple></md-ripple>
+                    <img src="http://127.0.0.1:${port}/view?filename=${file}&type=output">
+                `;
+                historyItem.querySelector('img').addEventListener('click', () => {
+                openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
+                });
+                historyList.appendChild(historyItem);
+            }
+            });
+        });
+
+        deleteHistoryItem = (file) => {
+            const dialog = document.createElement('md-dialog');
+            dialog.setAttribute('type', 'alert');
+            dialog.innerHTML = `
+                <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
+                <form slot="content" id="form-id" method="dialog">
+                    您确定要删除历史记录 “${file}” 吗？
+                </form>
+                <div slot="actions">
+                    <md-text-button form="form-id" value="cancel">取消</md-text-button>
+                    <md-text-button form="form-id" value="delete">删除</md-text-button>
+                </div>
+            `;
+            document.body.appendChild(dialog);
+
+            dialog.addEventListener('close', () => {
+            if (dialog.returnValue === 'delete') {
+                fs.unlink(path.join(historyPath, file), (err) => {
+                if (err) {
+                    openDialog('error', '删除失败', '删除历史记录过程中发生错误。');
+                    return;
+                }
+                const historyItem = Array.from(historyList.children).find(item => item.querySelector('img').src.includes(file));
+                if (historyItem) {
+                    historyList.removeChild(historyItem);
+                }
+                });
+            }
+            document.body.removeChild(dialog);
+            });
+
+            dialog.show();
+        };
+
+        selectHistoryItem = (file) => {
+            const selectedImage = `http://127.0.0.1:${port}/view?filename=${file}&type=output`;
+            openImageViewer(selectedImage);
+        };
+    }
+
+    loadAppMain = () => {
 
         // modelPath载入到列表中
         const modelList = $(".container-model #model-list");
         const modelPathE = $(".container-model #model-path");
         const modelPathButton = $(".container-model #model-path-button");
         const modelSelect = $("#app-core-image-generator #model-select");
+        modelList.innerHTML = ``;
+        modelSelect.innerHTML = ``;
 
         modelPathE.value = modelPath;
         fs.readdir(modelPath, (err, files) => {
@@ -357,8 +427,9 @@ const loadApp = () => {
                 }
             });
 
-            modelSelect.value = files[0];
-
+            setTimeout(() => {
+                modelSelect.value = files[0];
+            }, 20);
         });
 
         //删除模型
@@ -405,72 +476,9 @@ const loadApp = () => {
             });
         }
 
-        const historyList = $(".container-history #history-list");
+        loadHistory()
 
-        //fs获取historyPath中的文件，然后显示在historyList中
-        fs.readdir(historyPath, (err, files) => {
-            if (err) {
-            console.error(err);
-            return;
-            }
-            files.reverse().forEach(file => {
-            if (file.endsWith('.png')) {
-                //创建 md-card 元素
-                const historyItem = document.createElement("md-card");
-                historyItem.className = 'ripple';
-                historyItem.innerHTML = `
-                    <md-checkbox></md-checkbox>
-                    <md-ripple></md-ripple>
-                    <img src="http://127.0.0.1:${port}/view?filename=${file}&type=output">
-                `;
-                historyItem.querySelector('img').addEventListener('click', () => {
-                openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
-                });
-                historyList.appendChild(historyItem);
-            }
-            });
-        });
-
-        deleteHistoryItem = (file) => {
-            const dialog = document.createElement('md-dialog');
-            dialog.setAttribute('type', 'alert');
-            dialog.innerHTML = `
-            <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
-            <form slot="content" id="form-id" method="dialog">
-                您确定要删除历史记录 “${file}” 吗？
-            </form>
-            <div slot="actions">
-                <md-text-button form="form-id" value="cancel">取消</md-text-button>
-                <md-text-button form="form-id" value="delete">删除</md-text-button>
-            </div>
-            `;
-            document.body.appendChild(dialog);
-
-            dialog.addEventListener('close', () => {
-            if (dialog.returnValue === 'delete') {
-                fs.unlink(path.join(historyPath, file), (err) => {
-                if (err) {
-                    openDialog('error', '删除失败', '删除历史记录过程中发生错误。');
-                    return;
-                }
-                const historyItem = Array.from(historyList.children).find(item => item.querySelector('img').src.includes(file));
-                if (historyItem) {
-                    historyList.removeChild(historyItem);
-                }
-                });
-            }
-            document.body.removeChild(dialog);
-            });
-
-            dialog.show();
-        };
-
-        selectHistoryItem = (file) => {
-            const selectedImage = `http://127.0.0.1:${port}/view?filename=${file}&type=output`;
-            openImageViewer(selectedImage);
-        };
-
-        const openImageViewer = (imageUrl) => {
+        openImageViewer = (imageUrl) => {
             const viewer = document.createElement('div');
             viewer.classList.add('image-viewer');
             viewer.innerHTML = `
@@ -750,7 +758,9 @@ const loadApp = () => {
                                 }
 
                                 // Scroll the image container to the bottom
+                                loadHistory()
                                 const imageContainer = $("#app-core-image-viewer");
+                                imageContainer.style.scrollBehavior = 'smooth';
                                 imageContainer.scrollTop = imageContainer.scrollHeight;
 
                             })
