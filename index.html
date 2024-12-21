@@ -88,7 +88,10 @@
             <md-icon-button id="comfyui-web-button" onclick='switchContainer("#comfyui-web-button", "container-comfyui-web");'>
              <md-icon>build</md-icon>
             </md-icon-button>
-            <md-icon-button id="refresh-button" onclick='loadAppMain(); document.querySelector(".container-comfyui-web").src = `http://127.0.0.1:${port}`;' style="margin-top: auto;">
+            <md-icon-button id="terminal-button" onclick='switchContainer("#terminal-button", "container-terminal");' style="margin-top: auto;">
+              <md-icon>terminal</md-icon>
+            </md-icon-button>
+            <md-icon-button id="refresh-button" onclick='loadAppMain(); document.querySelector(".container-comfyui-web").src = `http://127.0.0.1:${port}`;'>
               <md-icon>refresh</md-icon>
             </md-icon-button>
             <md-icon-button id="settings-button" onclick='switchContainer("#settings-button", "container-settings");'>
@@ -123,10 +126,12 @@
               <md-outlined-text-field type="number" label="生成批次" id="batch-size-a" value="1"   style="margin-left: 10px;"></md-outlined-text-field>
 
             </p>
+            
             <p>
               <md-outlined-text-field type="number" label="步数" id="setps-slider" value="20"></md-outlined-text-field>
             </p>
-            <p>
+
+            <p style="margin-top: auto;">
               <md-linear-progress id="progress-bar" value="0" max="100"></md-linear-progress>
             </p>
 
@@ -140,8 +145,18 @@
         </container>
 
         <container class="container-history" style="display: none;">
+
           <h1>历史记录</h1>
+
+          <div class="container-history-floating-menu">
+            <md-checkbox id="select-all"></md-checkbox>
+            <md-icon-button id="delete-selected">
+                <md-icon>delete</md-icon>
+            </md-icon-button>
+          </div>
+
           <div id="history-list"></div>
+
         </container>
 
         <container class="container-model" style="display: none;">
@@ -171,6 +186,12 @@
               <md-icon slot="start">deployed_code</md-icon>
                 <md-text-button slot="end" onclick="downloadModel('https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors')">下载</md-text-button>
             </md-list-item>
+        </container>
+
+        <container class="container-terminal" style="display: none;">
+          <pre>
+            <code id="terminal"></code>
+          </pre>
         </container>
 
         <iframe    class="container-comfyui-web" style="display: none;" src="http://127.0.0.1:8190"></iframe>

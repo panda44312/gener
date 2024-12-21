@@ -72,6 +72,10 @@ const switchContainer = (e, pageName) => {
     }
 }
 
+const terminal = (log) => {
+    $("#terminal").textContent = $("#terminal").textContent += "\n" + log;
+};
+
 /* 窗口管理 */
 
 const minimizeWindow = () => {
@@ -297,10 +301,9 @@ const loadApp = () => {
                     comfyUIProcess = exec(command);
                     comfyUIProcess.stderr.on('data', (data) => {
                         console.log(`stderr: ${data}`);
+                        terminal(data)
 
-                        console.log(`stdout: ${data}`);
                         if (data.includes(`To see the GUI go to: http://127.0.0.1:${port}`)) {
-                            console.log(`To see the GUI go to: http://127.0.0.1:${port}（注意，进程未退出）`);
                             $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
                             $("#comfy-ui-load").value = 1;
                             generateButton.disabled = false;
@@ -331,64 +334,112 @@ const loadApp = () => {
         //fs获取historyPath中的文件，然后显示在historyList中
         fs.readdir(historyPath, (err, files) => {
             if (err) {
-            console.error(err);
-            return;
+                console.error(err);
+                return;
             }
             files.reverse().forEach(file => {
-            if (file.endsWith('.png')) {
-                //创建 md-card 元素
-                const historyItem = document.createElement("md-card");
-                historyItem.className = 'ripple';
-                historyItem.innerHTML = `
-                    <md-checkbox></md-checkbox>
-                    <md-ripple></md-ripple>
-                    <img src="http://127.0.0.1:${port}/view?filename=${file}&type=output">
-                `;
-                historyItem.querySelector('img').addEventListener('click', () => {
-                openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
+                if (file.endsWith('.png')) {
+                    //创建 md-card 元素
+                    const historyItem = document.createElement("md-card");
+                    historyItem.className = 'ripple';
+                    const uuid = generateUUID();
+                    historyItem.innerHTML = `
+                        <md-checkbox id="${uuid}"></md-checkbox>
+                        <md-ripple></md-ripple>
+                        <img src="http://127.0.0.1:${port}/view?filename=${file}&type=output">
+                    `;
+                    historyItem.querySelector('img').addEventListener('click', () => {
+                        openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
+                    });
+                    historyList.appendChild(historyItem);
+                }
+            });
+
+            // Add floating menu
+            const floatingMenu = $(`.container-history-floating-menu`)
+
+            const selectAllCheckbox = floatingMenu.querySelector('#select-all');
+            const deleteSelectedButton = floatingMenu.querySelector('#delete-selected');
+
+            selectAllCheckbox.addEventListener('change', () => {
+                const isChecked = selectAllCheckbox.checked;
+                historyList.querySelectorAll('md-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
                 });
-                historyList.appendChild(historyItem);
-            }
+                updateSelectAllCheckboxState();
+            });
+
+            deleteSelectedButton.addEventListener('click', () => {
+                const selectedFiles = [];
+                historyList.querySelectorAll('md-checkbox').forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const file = checkbox.closest('md-card').querySelector('img').src.split('filename=')[1].split('&')[0];
+                        selectedFiles.push(file);
+                    }
+                });
+                selectedFiles.forEach(file => {
+                    deleteHistoryItem(file);
+                });
+            });
+
+            historyList.querySelectorAll('md-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectAllCheckboxState);
             });
         });
 
-        deleteHistoryItem = (file) => {
-            const dialog = document.createElement('md-dialog');
-            dialog.setAttribute('type', 'alert');
-            dialog.innerHTML = `
-                <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
-                <form slot="content" id="form-id" method="dialog">
-                    您确定要删除历史记录 “${file}” 吗？
-                </form>
-                <div slot="actions">
-                    <md-text-button form="form-id" value="cancel">取消</md-text-button>
-                    <md-text-button form="form-id" value="delete">删除</md-text-button>
-                </div>
-            `;
-            document.body.appendChild(dialog);
-
-            dialog.addEventListener('close', () => {
-            if (dialog.returnValue === 'delete') {
-                fs.unlink(path.join(historyPath, file), (err) => {
-                if (err) {
-                    openDialog('error', '删除失败', '删除历史记录过程中发生错误。');
-                    return;
-                }
-                const historyItem = Array.from(historyList.children).find(item => item.querySelector('img').src.includes(file));
-                if (historyItem) {
-                    historyList.removeChild(historyItem);
-                }
-                });
-            }
-            document.body.removeChild(dialog);
+        generateUUID = () => {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
             });
-
-            dialog.show();
         };
 
-        selectHistoryItem = (file) => {
-            const selectedImage = `http://127.0.0.1:${port}/view?filename=${file}&type=output`;
-            openImageViewer(selectedImage);
+        deleteHistoryItem = (files) => {
+            const deletePromises = files.map(file => {
+                return new Promise((resolve, reject) => {
+                    fs.unlink(path.join(historyPath, file), (err) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(file);
+                        }
+                    });
+                });
+            });
+
+            Promise.all(deletePromises)
+                .then(deletedFiles => {
+                    deletedFiles.forEach(file => {
+                        const historyItem = Array.from(historyList.children).find(item => item.querySelector('img').src.includes(file));
+                        if (historyItem) {
+                            historyList.removeChild(historyItem);
+                        }
+                    });
+                    updateSelectAllCheckboxState();
+                })
+                .catch(err => {
+                    openDialog('error', '删除失败', '删除历史记录过程中发生错误。');
+                    console.error(err);
+                });
+        };
+
+        updateSelectAllCheckboxState = () => {
+            const checkboxes = historyList.querySelectorAll('md-checkbox');
+            const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+            const selectAllCheckbox = $(`.container-history-floating-menu #select-all`);
+            if (checkedCheckboxes.length === 0) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+            historyList.classList.remove('checked');
+            } else if (checkedCheckboxes.length === checkboxes.length) {
+            selectAllCheckbox.checked = true;
+            selectAllCheckbox.indeterminate = false;
+            historyList.classList.add('checked');
+            } else {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = true;
+            historyList.classList.add('checked');
+            }
         };
     }
 
@@ -676,7 +727,7 @@ const loadApp = () => {
                 },
                 "class_type": "CLIPTextEncode",
                 "_meta": {
-                    "title": "负面提升*"
+                    "title": "负面提示*"
                 }
                 }
             };
@@ -748,21 +799,36 @@ const loadApp = () => {
                                 }
 
                                 for (const imageUrl of imageUrls) {
-                                    const image = document.createElement('img');
-                                    image.src = imageUrl;
-                                    image.addEventListener('click', () => {
+                                    const historyItem = document.createElement("md-card");
+                                    historyItem.className = 'ripple';
+                                    historyItem.innerHTML = `
+                                        <md-ripple></md-ripple>
+                                        <img src="${imageUrl}">
+                                    `;
+                                    historyItem.querySelector('img').addEventListener('click', () => {
                                         openImageViewer(imageUrl);
                                     });
                                     const imageContainer = $("#app-core-image-viewer");
-                                    imageContainer.appendChild(image);
+                                    imageContainer.appendChild(historyItem);
                                 }
 
                                 // Scroll the image container to the bottom
                                 loadHistory()
-                                const imageContainer = $("#app-core-image-viewer");
-                                imageContainer.style.scrollBehavior = 'smooth';
-                                imageContainer.scrollTop = imageContainer.scrollHeight;
 
+                                setTimeout(() => {
+                                    const imageContainer = $("#app-core-image-viewer");
+                                    imageContainer.style.scrollBehavior = 'smooth';
+                                    $('#app-core-image-viewer').scrollTop = 1200000000000000;
+
+                                    // Check the number of images and add/remove the 'only' class
+                                    const images = imageContainer.querySelectorAll('img');
+                                    const appViewer = $("#app-core-image-viewer");
+                                    if (images.length === 1) {
+                                        appViewer.classList.add('only');
+                                    } else {
+                                        appViewer.classList.remove('only');
+                                    }
+                                }, 20)
                             })
                             .catch(err => {
                                 console.error(err);

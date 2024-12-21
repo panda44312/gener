@@ -227,10 +227,11 @@ page h1 md-icon {
     display: flex;
     flex-direction: row;
     padding: 0;
-    border-radius: 1rem 0 0 1rem;
+    border-radius: 1rem;
     overflow: auto;
     padding-left: 20px;
     padding-right: 20px;
+    margin-right: 10px;
 }
 
 .page-main container app-left {
@@ -246,9 +247,6 @@ page h1 md-icon {
 
 .page-main container app-right {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding: 0;
     width: 65%;
     margin: 10px;
     margin-left: 20px;
@@ -259,7 +257,15 @@ page h1 md-icon {
     overflow: auto;
     padding: 10px;
     padding-right: 10px;
+    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+    align-content: space-evenly;
 }
+
+.page-main container app-right.only {
+    grid-template-columns: 1fr;
+}
+
 
 .page-main container app-card {
     display: flex;
@@ -379,19 +385,19 @@ details > summary::-webkit-details-marker {
 
 #app-core-image-viewer img {
     width: 100%;
-    height: auto;
     border-radius: 1rem;
 }
 
 #history-list {
     display:grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 10px;
     row-gap: 10px;
     padding: 0;
     margin: 0;
     border-radius: 1rem;
     background: 0;
+    padding-bottom: 20px;
 }
 
 @media (max-width: 400px) {
@@ -400,9 +406,16 @@ details > summary::-webkit-details-marker {
     }
 }
 
-@media (min-width: 500px) and (max-width: 800px) {
+@media (min-width: 500px) and (max-width: 600px) {
     #history-list {
         grid-template-columns: 1fr 1fr;
+    }
+}
+
+
+@media (min-width: 600px) {
+    #history-list {
+        grid-template-columns: 1fr 1fr 1fr;
     }
 }
 
@@ -418,8 +431,9 @@ details > summary::-webkit-details-marker {
     }
 }
 
-#history-list md-card {
+#history-list md-card, #app-core-image-viewer md-card {
     width: 100%;
+    height: 100%;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -433,8 +447,8 @@ details > summary::-webkit-details-marker {
 #history-list md-card md-checkbox {
     opacity: 0;
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 21px;
+    left: 21px;
     transition: opacity 0.25s;
 }
 
@@ -452,11 +466,6 @@ details > summary::-webkit-details-marker {
     left: -20px;
     top: -20px;
     position: absolute;
-}
-
-#history-list md-card:hover md-checkbox[checked]::after {
-    width: 1000px;
-    height: 1000px;
 }
 
 #history-list md-card img {
@@ -526,4 +535,51 @@ md-circular-progress#comfy-ui-load {
     --md-icon-button-hover-icon-color: #ffffff;
     --md-icon-button-focus-icon-color: #ffffff;
     --md-icon-button-pressed-icon-color: #ffffff;
+}
+
+.container-history #history-list.checked {
+
+}
+
+.container-history #history-list.checked md-card md-checkbox::after {
+    width: 1000px;
+    height: 1000px;
+}
+
+.container-history #history-list.checked md-card md-checkbox {
+    opacity: 1;
+}
+
+.container-history-floating-menu {
+    display: flex;
+    margin-bottom: 10px;
+    /* padding-left: 10px; */
+    /* padding-right: 10px; */
+}
+
+.container-history-floating-menu #select-all {
+    padding: 11px;
+}
+
+.container-history-floating-menu #delete-selected {
+    margin-left: auto;
+}
+
+.container-terminal {
+    background: #222222 !important;
+    background-color: #222222;
+    color: #fff !important;
+    
+    user-select: auto !important;
+}
+
+.container-terminal pre code {
+    color: #fff !important;
+    font-size: 16px;
+        word-wrap: break-word;
+    overflow-wrap: break-word;
+    user-select: auto !important;
+}
+
+#app-core-image-viewer md-card {
 }
