@@ -7,7 +7,19 @@ const child_process = require('child_process');
 const http = require('http');
 const { console } = require('inspector');
 
-const port = 8190;
+const getRandomPort = () => {
+    const min = 1024;
+    const max = 65535;
+    const commonPorts = [80, 443, 8080, 3306, 5432, 6379, 27017];
+    let port;
+    do {
+        port = Math.floor(Math.random() * (max - min + 1)) + min;
+    } while (commonPorts.includes(port));
+    return port;
+};
+
+let port = getRandomPort();
+
 //全局变量
 
 const downloadUrl = 'https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_nvidia.7z';
@@ -261,71 +273,54 @@ const loadApp = () => {
 
     // 检测用户是否有显卡
     let comfyUIProcess;
-    const checkServer = (port, callback) => {
-        const options = {
-            method: 'HEAD',
-            host: '127.0.0.1',
-            port: port,
-            path: '/'
-        };
-
-        const req = http.request(options, (res) => {
-            callback(res.statusCode === 200);
-        });
-
-        req.on('error', () => {
-            callback(false);
-        });
-
-        req.end();
-    };
 
     const generateButton = $("#app-core-image-generator #generate-button");
 
-    checkServer(port, (isRunning) => {
-        if (isRunning) {
-            console.log(`Server is already running on port ${port}.`);
-            $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
-            $("#comfy-ui-load").value = 1;
-            generateButton.disabled = false;
-            loadAppMain()
-        } else {
-            exec('wmic path win32_VideoController get name', (err, stdout, stderr) => {
-                if (err) {
-                    openDialog('error', '显卡检测失败', '显卡检测过程中发生错误。');
-                    return;
-                }
-                if (stdout.includes("NVIDIA")) {
-                    console.log("NVIDIA显卡检测通过。");
-                    const command = `"${path.join(comfyUIPathPython, 'python_embeded/python.exe')}" -s ${path.join(comfyUIPathPython, 'ComfyUI/main.py')} --port ${port}  `;
-                    comfyUIProcess = exec(command);
-                    comfyUIProcess.stderr.on('data', (data) => {
-                        console.log(`stderr: ${data}`);
-                        terminal(data)
+    Setrat = async () => {
 
-                        if (data.includes(`To see the GUI go to: http://127.0.0.1:${port}`)) {
-                            $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
-                            $("#comfy-ui-load").value = 1;
-                            generateButton.disabled = false;
-                            loadAppMain()
-                        }
+        exec('taskkill /f /im python.exe');
+        //人为等待一段时间
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await delay(20);
+        console.log("等待结束，继续执行...");
 
-                    });
-                    comfyUIProcess.on('close', (code) => {
-                        if (code !== 0) {
-                            openDialog('error', '启动失败', 'ComfyUI启动失败。');
-                        } else {
-                            console.log("ComfyUI started successfully with NVIDIA GPU.");
-                        }
-                    });
-                } else {
-                    openDialog('error', '显卡检测失败', '检测到您的电脑没有NVIDIA显卡，ComfyUI将使用CPU运行，速度可能会较慢。');
-                    console.log("No NVIDIA GPU detected. Starting with CPU...");
-                }
-            });
+        exec('wmic path win32_VideoController get name', (err, stdout, stderr) => {
+            if (err) {
+                openDialog('error', '显卡检测失败', '显卡检测过程中发生错误。');
+                return;
+            }
+            if (stdout.includes("NVIDIA")) {
+                console.log("NVIDIA显卡检测通过。");
+                const command = `"${path.join(comfyUIPathPython, 'python_embeded/python.exe')}" -s ${path.join(comfyUIPathPython, 'ComfyUI/main.py')} --port ${port}  `;
+                comfyUIProcess = exec(command);
+                comfyUIProcess.stderr.on('data', (data) => {
+                    console.log(`stderr: ${data}`);
+                    terminal(data)
 
-        }
-    });
+                    if (data.includes(`To see the GUI go to: http://127.0.0.1:${port}`)) {
+                        $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
+                        $("#comfy-ui-load").value = 1;
+                        generateButton.disabled = false;
+                        loadAppMain()
+                    }
+
+                });
+                comfyUIProcess.on('close', (code) => {
+                    if (code !== 0) {
+                        openDialog('error', '启动失败', 'ComfyUI启动失败。');
+                    } else {
+                        console.log("ComfyUI started successfully with NVIDIA GPU.");
+                    }
+                });
+            } else {
+                openDialog('error', '显卡检测失败', '检测到您的电脑没有NVIDIA显卡，ComfyUI将使用CPU运行，速度可能会较慢。');
+                console.log("No NVIDIA GPU detected. Starting with CPU...");
+            }
+        });
+
+    }
+    
+    Setrat()
 
     loadHistory = () => {
         const historyList = $(".container-history #history-list");

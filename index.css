@@ -220,7 +220,8 @@ page h1 md-icon {
     width: 100%;
     height: 100%;
     border: none;
-    border-radius: 1rem 0 0 1rem;
+    border-radius: 1rem;
+    margin-right: 10px;
 }
 
 .page-main container {
