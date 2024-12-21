@@ -674,9 +674,9 @@ const loadApp = () => {
                 "inputs": {
                     "seed": seedValue,
                     "steps": stepsValue,
-                    "cfg": 1,
+                    "cfg": model.includes('flux') ? 1 : 8,
                     "sampler_name": "euler",
-                    "scheduler": "simple",
+                    "scheduler": model.includes('flux') ? "simple" : "normal",
                     "denoise": 1,
                     "model": [
                     "30",
