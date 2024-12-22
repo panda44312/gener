@@ -86,6 +86,8 @@ const switchContainer = (e, pageName) => {
 
 const terminal = (log) => {
     $("#terminal").textContent = $("#terminal").textContent += "\n" + log;
+    $(".container-terminal").style.scrollBehavior = 'smooth';
+    $(".container-terminal").scrollTop = 120000000000000000000000;
 };
 
 /* 窗口管理 */
@@ -296,6 +298,9 @@ const loadApp = () => {
                 comfyUIProcess.stderr.on('data', (data) => {
                     console.log(`stderr: ${data}`);
                     terminal(data)
+
+                    if($("#comfy-ui-load").value != 1)
+                        $("#comfy-ui-load").value = $("#comfy-ui-load").value + 0.05;
 
                     if (data.includes(`To see the GUI go to: http://127.0.0.1:${port}`)) {
                         $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
@@ -567,6 +572,30 @@ const loadApp = () => {
         });
 
         //图片生成逻辑
+        const imageLoadBtn = $("#app-core-image-generator #image-load-btn");
+        
+        imageLoadBtn.onclick = () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.multiple = true;
+    
+            fileInput.onchange = (event) => {
+                const files = event.target.files;
+                for (const file of files) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('uploaded-image');
+                        $("#app-core-image-viewer").appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            fileInput.click();
+        }
 
         generateButton.onclick = () => {
 
@@ -576,141 +605,148 @@ const loadApp = () => {
             const sizeSelect = $("#app-core-image-generator #size-select");
             const steps = $("#app-core-image-generator #setps-slider");
             const batchSize = $("#app-core-image-generator #batch-size");
+            const batchSizeA = $("#batch-size-a");
 
             if(batchSize.value === '0') {
-                batchSize.value = 1;
+            batchSize.value = 1;
             }
 
             if (steps.value === '0') {
-                steps.value = 20;
+            steps.value = 20;
             }
 
             if (modelSelect.value === '') {
-                openDialog('error', '生成失败', '请选择一个模型。');
-                return;
+            openDialog('error', '生成失败', '请选择一个模型。');
+            return;
             }
 
             if (textField.value === '') {
-                openDialog('error', '生成失败', '请输入一个提示词。');
-                return;
+            openDialog('error', '生成失败', '请输入一个提示词。');
+            return;
             }
 
-            const model = modelSelect.value;
-            const prompt = textField.value;
-            const size = sizeSelect.value;
-            const seedValue = Math.floor(Math.random() * Math.pow(2, 64));
-            const stepsValue = steps.value;
-            const sizeValue = size.split('x');
-            const batchSizeValue = batchSize.value;
+            let model = modelSelect.value;
+            let prompt = textField.value;
+            let size = sizeSelect.value;
+            let seedValue = Math.floor(Math.random() * Math.pow(2, 64));
+            let stepsValue = steps.value;
+            let sizeValue = size.split('x');
+            if (size === 'custom') {
+            sizeValue[0] = $("#width-num").value;
+            sizeValue[1] = $("#height-num").value;
+            }
+            let batchSizeValue = batchSize.value;
+            let batchSizeAValue = batchSizeA.value;
 
             generateButton.disabled = true;
             generateButton.textContent = "生成中...";
 
+            for (let i = 0; i < batchSizeAValue; i++) {
             //创造向api请求的json, 由于使用的是 comfyUI，需要构造工作流
             const data = {
                 "6": {
                 "inputs": {
-                    "text": prompt,
-                    "clip": [
-                    "30",
-                    1
-                    ]
+                "text": prompt,
+                "clip": [
+                "30",
+                1
+                ]
                 },
                 "class_type": "CLIPTextEncode",
                 "_meta": {
-                    "title": "提示词"
+                "title": "提示词"
                 }
                 },
                 "8": {
                 "inputs": {
-                    "samples": [
-                    "31",
-                    0
-                    ],
-                    "vae": [
-                    "30",
-                    2
-                    ]
+                "samples": [
+                "31",
+                0
+                ],
+                "vae": [
+                "30",
+                2
+                ]
                 },
                 "class_type": "VAEDecode",
                 "_meta": {
-                    "title": "VAE解码"
+                "title": "VAE解码"
                 }
                 },
                 "9": {
                 "inputs": {
-                    "filename_prefix": "ComfyUI",
-                    "images": [
-                    "8",
-                    0
-                    ]
+                "filename_prefix": "ComfyUI",
+                "images": [
+                "8",
+                0
+                ]
                 },
                 "class_type": "SaveImage",
                 "_meta": {
-                    "title": "保存图像"
+                "title": "保存图像"
                 }
                 },
                 "27": {
                 "inputs": {
-                    "width": sizeValue[0],
-                    "height": sizeValue[1],
-                    "batch_size": batchSizeValue
+                "width": sizeValue[0],
+                "height": sizeValue[1],
+                "batch_size": batchSizeValue
                 },
                 "class_type": "EmptySD3LatentImage",
                 "_meta": {
-                    "title": "创建一个画布"
+                "title": "创建一个画布"
                 }
                 },
                 "30": {
                 "inputs": {
-                    "ckpt_name": model
+                "ckpt_name": model
                 },
                 "class_type": "CheckpointLoaderSimple",
                 "_meta": {
-                    "title": "载入模型"
+                "title": "载入模型"
                 }
                 },
                 "31": {
                 "inputs": {
-                    "seed": seedValue,
-                    "steps": stepsValue,
-                    "cfg": model.includes('flux') ? 1 : 8,
-                    "sampler_name": "euler",
-                    "scheduler": model.includes('flux') ? "simple" : "normal",
-                    "denoise": 1,
-                    "model": [
-                    "30",
-                    0
-                    ],
-                    "positive": [
-                    "6",
-                    0
-                    ],
-                    "negative": [
-                    "33",
-                    0
-                    ],
-                    "latent_image": [
-                    "27",
-                    0
-                    ]
+                "seed": seedValue,
+                "steps": stepsValue,
+                "cfg": model.includes('flux') ? 1 : 8,
+                "sampler_name": "euler",
+                "scheduler": model.includes('flux') ? "simple" : "normal",
+                "denoise": 1,
+                "model": [
+                "30",
+                0
+                ],
+                "positive": [
+                "6",
+                0
+                ],
+                "negative": [
+                "33",
+                0
+                ],
+                "latent_image": [
+                "27",
+                0
+                ]
                 },
                 "class_type": "KSampler",
                 "_meta": {
-                    "title": "生成"
+                "title": "生成"
                 }
                 },
                 "33": {
                 "inputs": {
-                    "text": "",
-                    "clip": [
-                    "30",
-                    1
-                    ]
+                "text": "",
+                "clip": [
+                "30",
+                1
+                ]
                 },
                 "class_type": "CLIPTextEncode",
                 "_meta": {
-                    "title": "负面提示*"
+                "title": "负面提示*"
                 }
                 }
             };
@@ -718,11 +754,11 @@ const loadApp = () => {
             fetch(`http://127.0.0.1:${port}/prompt`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    client_id: 'ComfyUI',
-                    prompt: data
+                client_id: 'ComfyUI',
+                prompt: data
                 })
             })
             .catch(err => {
@@ -740,93 +776,92 @@ const loadApp = () => {
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 if (data.type === 'progress') {
-                    progressBar.value = data.data.value;
-                    progressBar.max = data.data.max;
+                progressBar.value = data.data.value;
+                progressBar.max = data.data.max;
                 }
 
                 if (data.type === 'status') {
-                    const queueRemaining = data.data.status.exec_info.queue_remaining;
-                    console.log(`Queue remaining: ${queueRemaining}`);
+                const queueRemaining = data.data.status.exec_info.queue_remaining;
+                console.log(`Queue remaining: ${queueRemaining}`);
                 }
 
                 if (data.type === 'execution_start') {
-                    const promptId = data.data.prompt_id;
-                    console.log(`Execution started for prompt ${promptId}`);
+                const promptId = data.data.prompt_id;
+                console.log(`Execution started for prompt ${promptId}`);
                 }
 
                 if (data.type === 'executing') {
-                    const node = data.data.node;
+                const node = data.data.node;
+                const promptId = data.data.prompt_id;
+                console.log(`Executing node ${node} for prompt ${promptId}`);
+                
+                if (node === null) {
                     const promptId = data.data.prompt_id;
-                    console.log(`Executing node ${node} for prompt ${promptId}`);
-                    
-                    if (node === null) {
-                        const promptId = data.data.prompt_id;
-                        fetch(`http://127.0.0.1:${port}/history/${promptId}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log(data);
+                    fetch(`http://127.0.0.1:${port}/history/${promptId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
 
-                                if(data[promptId].outputs == null) {
-                                    openDialog('error', '生成失败', '生成失败，ComfyUI 发生错误。');
-                                    console.log('No output images found.');
-                                    return;
-                                }
+                        if(data[promptId].outputs == null) {
+                        openDialog('error', '生成失败', '生成失败，ComfyUI 发生错误。');
+                        console.log('No output images found.');
+                        return;
+                        }
 
-                                const images = data[promptId].outputs['9'].images;
-                                const imageUrls = [];
+                        const images = data[promptId].outputs['9'].images;
+                        const imageUrls = [];
 
-                                for (const image of images) {
-                                    let fileName = image.filename;
-                                    let imageUrl = `http://127.0.0.1:${port}/view?filename=${fileName}&type=output`;
-                                    imageUrls.push(imageUrl);
-                                }
+                        for (const image of images) {
+                        let fileName = image.filename;
+                        let imageUrl = `http://127.0.0.1:${port}/view?filename=${fileName}&type=output`;
+                        imageUrls.push(imageUrl);
+                        }
 
-                                for (const imageUrl of imageUrls) {
-                                    const historyItem = document.createElement("md-card");
-                                    historyItem.className = 'ripple';
-                                    historyItem.innerHTML = `
-                                        <md-ripple></md-ripple>
-                                        <img src="${imageUrl}">
-                                    `;
-                                    historyItem.querySelector('img').addEventListener('click', () => {
-                                        openImageViewer(imageUrl);
-                                    });
-                                    const imageContainer = $("#app-core-image-viewer");
-                                    imageContainer.appendChild(historyItem);
-                                }
+                        for (const imageUrl of imageUrls) {
+                        const historyItem = document.createElement("md-card");
+                        historyItem.className = 'ripple';
+                        historyItem.innerHTML = `
+                            <md-ripple></md-ripple>
+                            <img src="${imageUrl}">
+                        `;
+                        historyItem.querySelector('img').addEventListener('click', () => {
+                            openImageViewer(imageUrl);
+                        });
+                        const imageContainer = $("#app-core-image-viewer");
+                        imageContainer.appendChild(historyItem);
+                        }
 
-                                // Scroll the image container to the bottom
-                                loadHistory()
+                        // Scroll the image container to the bottom
+                        loadHistory()
 
-                                setTimeout(() => {
-                                    const imageContainer = $("#app-core-image-viewer");
-                                    imageContainer.style.scrollBehavior = 'smooth';
-                                    $('#app-core-image-viewer').scrollTop = 1200000000000000;
+                        setTimeout(() => {
+                        const imageContainer = $("#app-core-image-viewer");
+                        imageContainer.style.scrollBehavior = 'smooth';
+                        $('#app-core-image-viewer').scrollTop = 1200000000000000;
 
-                                    // Check the number of images and add/remove the 'only' class
-                                    const images = imageContainer.querySelectorAll('img');
-                                    const appViewer = $("#app-core-image-viewer");
-                                    if (images.length === 1) {
-                                        appViewer.classList.add('only');
-                                    } else {
-                                        appViewer.classList.remove('only');
-                                    }
-                                }, 20)
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                openDialog('error', '生成失败', '生成过程中发生错误。');
-                            });
-        
-                        generateButton.textContent = "生成";
-                        generateButton.disabled = false;
+                        // Check the number of images and add/remove the 'only' class
+                        const images = imageContainer.querySelectorAll('img');
+                        const appViewer = $("#app-core-image-viewer");
+                        if (images.length === 1) {
+                            appViewer.classList.add('only');
+                        } else {
+                            appViewer.classList.remove('only');
+                        }
+                        }, 20)
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        openDialog('error', '生成失败', '生成过程中发生错误。');
+                    });
+            
+                    generateButton.textContent = "生成";
+                    generateButton.disabled = false;
 
-                    }
+                }
                 }
                 
             }
-
-
+            }
         }
         
     }

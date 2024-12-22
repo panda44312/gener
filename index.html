@@ -107,32 +107,60 @@
               <md-outlined-select label="模型" outlined id="model-select"></md-outlined-select>
             </p>
 
-            <p>
-              <md-outlined-text-field id="prompt" type="textarea" label="提示词" rows="6"></md-outlined-text-field>
+            <p style="position: relative;">
+              <md-icon-button id="image-load-btn" style="position: absolute; top: 0; right: 0; z-index: 33;">
+                <md-icon>add_photo_alternate</md-icon>
+              </md-icon-button>
+              <md-outlined-text-field id="prompt" type="textarea" label="提示词" rows="5">
+              </md-outlined-text-field>
             </p>
 
             <p>
-              <md-outlined-select label="尺寸" outlined value="1024x1024" id="size-select">
+              <md-outlined-select label="尺寸" outlined value="1024x1024" id="size-select" onchange="toggleCustomSize()">
                 <md-select-option value="1024x1024"><md-icon slot="start">crop_square</md-icon>1:1 (1024x1024)</md-select-option>
                 <md-select-option value="768x768"  ><md-icon slot="start">crop_square</md-icon>1:1 (768x768)</md-select-option>
                 <md-select-option value="800x1000" ><md-icon slot="start">crop_free</md-icon>4:5 (800x1000)</md-select-option>
                 <md-select-option value="1280x720" ><md-icon slot="start">crop_16_9</md-icon>16:9 (1280x720)</md-select-option>
                 <md-select-option value="720x1280" ><md-icon slot="start">crop_9_16</md-icon>9:16 (720x1280)</md-select-option>
                 <md-select-option value="768x1024" ><md-icon slot="start">crop_free</md-icon>3:4 (768x1024)</md-select-option>
+                <md-select-option value="848x1264"><md-icon slot="start">crop_free</md-icon>2:3 (848x1264)</md-select-option>
+                <md-select-option value="1584x672"><md-icon slot="start">crop_free</md-icon>2.35:1 (1584x672)</md-select-option>
+                <md-select-option value="custom" ><md-icon slot="start">crop_free</md-icon>自定义</md-select-option>
               </md-outlined-select>
             </p>
-            <p style="display: flex;">
+
+            <p style="display: none;" id="width_box">
+              <md-outlined-text-field type="number" label="宽" id="width-num" value="1024"  style="margin-right: 10px;"  suffix-text="px"></md-outlined-text-field>
+              <md-outlined-text-field type="number" label="长" id="height-num" value="1024"   style="margin-left: 10px;"  suffix-text="px"></md-outlined-text-field>
+            </p>
+
+            <p style="display: flex;" id="num_text_box">
               <md-outlined-text-field type="number" label="单次生成个数" id="batch-size" value="1"  style="margin-right: 10px;"></md-outlined-text-field>
               <md-outlined-text-field type="number" label="生成批次" id="batch-size-a" value="1"   style="margin-left: 10px;"></md-outlined-text-field>
+            </p>
 
+            <script>
+              function toggleCustomSize() {
+                const sizeSelect = document.getElementById('size-select');
+                const widthBox = document.getElementById('width_box');
+                if (sizeSelect.value === 'custom') {
+                  widthBox.style.display = 'flex';
+                } else {
+                  widthBox.style.display = 'none';
+                }
+              }
+            </script>
+
+            <p style="display: flex;">
+              <md-outlined-text-field type="number" label="步数" id="setps-slider" value="20"  ></md-outlined-text-field>
             </p>
-            
-            <p>
-              <md-outlined-text-field type="number" label="步数" id="setps-slider" value="20"></md-outlined-text-field>
-            </p>
+
+            <!-- <p>
+              <md-outlined-text-field type="number" label="图片参考比例" id="image-a" value="1" ></md-outlined-text-field>
+            </p> -->
 
             <p style="margin-top: auto;">
-              <md-linear-progress id="progress-bar" value="0" max="100"></md-linear-progress>
+              <md-linear-progress id="progress-bar" value="0" max="1"></md-linear-progress>
             </p>
 
             <p>

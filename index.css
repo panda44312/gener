@@ -240,10 +240,10 @@ page h1 md-icon {
     flex-direction: column;
     padding: 0;
     width: 35%;
-    margin: 20px;
+    padding: 20px;
     align-items: stretch;
-    margin-left: 0;
-    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .page-main container app-right {
@@ -580,6 +580,9 @@ md-circular-progress#comfy-ui-load {
         word-wrap: break-word;
     overflow-wrap: break-word;
     user-select: auto !important;
+    font-family: 'Cascadia Code';
+    /* 强制换行 */
+    white-space: pre-wrap;
 }
 
 #app-core-image-viewer md-card {
