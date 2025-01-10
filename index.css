@@ -9,17 +9,11 @@ body {
     --app-bg: #ffffff;
     --md-ref-typeface-brand: 'Noto Sans SC';
     --md-ref-typeface-plain: 'Noto Sans SC';
-    --md-sys-color-primary-o: 33, 150, 243;
-    --md-sys-color-primary: rgb(var(--md-sys-color-primary-o));
-    --md-sys-color-secondary: rgb(var(--md-sys-color-primary-o));
-    --md-list-container-color: rgb(var(--md-sys-color-primary-o), 0.1);
     font-family: 'Noto Sans SC';
-    --md-menu-container-color: rgb(238 247 255);
-    --md-menu-item-selected-container-color: rgb(var(--md-sys-color-primary-o), 0.3);
 }
 
 ::selection {
-    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
+    background-color: var(--md-sys-color-bg);
 }
 
 
@@ -36,19 +30,8 @@ body {
         --md-outlined-text-field-input-text-color: #ffffff;
         --md-outlined-field-content-font-color: #ffffff;
         --md-outlined-select-text-field-trailing-icon-color: #ffffff;
-        --md-menu-container-color: rgb(33, 33, 33);
-        --md-menu-item-selected-container-color: rgb(var(--md-sys-color-primary-o), 0.3);
         --md-linear-progress-track-color: #ffffff15;
     }
-
-    .page-main container app-right {
-        background-color: rgb(var(--md-sys-color-primary-o), 0.05) !important;
-    }
-    
-    container md-icon {
-        color: rgb(var(--md-sys-color-primary-o));
-    }
-
 }
 
 top-bar {
@@ -204,7 +187,7 @@ page h1 md-icon {
     overflow-y: hidden;
     position: relative;
     border-radius: 1rem 0 0 1rem;
-    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
+    background-color: var(--md-sys-color-bg);
 }
 
 .app-core container {
@@ -222,6 +205,7 @@ page h1 md-icon {
     border: none;
     border-radius: 1rem;
     margin-right: 10px;
+    background-color: var(--md-sys-color-bg);
 }
 
 .page-main container {
@@ -253,7 +237,7 @@ page h1 md-icon {
     margin-left: 20px;
     margin-right: -10px;
     position: relative;
-    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
+    background-color: var(--md-sys-color-bg);
     border-radius: 1rem;
     overflow: auto;
     padding: 10px;
@@ -274,7 +258,7 @@ page h1 md-icon {
     padding: 0;
     margin: 0;
     border-radius: 1rem;
-    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
+    background-color: var(--md-sys-color-bg);
     align-items: center;
     justify-content: center;
 }
@@ -284,8 +268,13 @@ page h1 md-icon {
 }
 
 
-#model-list {
+md-list {
     border-radius: 1rem;
+    margin-bottom: 20px;
+}
+
+md-menu[slotlistbox] {
+    background-color: var(--app-bg);
 }
 
 bottom-bar {
@@ -315,7 +304,7 @@ bottom-bar {
 
 left-bar md-icon-button.active {
     position: relative;
-    background-color: rgb(var(--md-sys-color-primary-o), 0.1);
+    background-color: var(--md-sys-color-bg);
     border-radius: 50%;
 
 }
@@ -367,14 +356,6 @@ left-bar md-icon-button.active {
     margin: 0;
     margin-top: 10px;
     margin-bottom: 10px;
-}
-
-details > summary {
-    list-style: none;
-}
-
-details > summary::-webkit-details-marker {
-    display: none;
 }
 
 #advanced-options-div {
@@ -577,7 +558,7 @@ md-circular-progress#comfy-ui-load {
 .container-terminal pre code {
     color: #fff !important;
     font-size: 16px;
-        word-wrap: break-word;
+    word-wrap: break-word;
     overflow-wrap: break-word;
     user-select: auto !important;
     font-family: 'Cascadia Code';
@@ -586,4 +567,24 @@ md-circular-progress#comfy-ui-load {
 }
 
 #app-core-image-viewer md-card {
+}
+
+input#theme-color-input {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    padding: 0;
+    background: var(--md-sys-color-bg);
+}
+
+input[type="color" i]::-webkit-color-swatch {
+    border-radius: 50%;
+    border: 0;
+    width: 30px;
+    height: 30px;
+}
+
+input[type="color" i]::-webkit-color-swatch-wrapper {
+    padding: 5px;
 }

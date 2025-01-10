@@ -97,6 +97,7 @@
             <md-icon-button id="settings-button" onclick='switchContainer("#settings-button", "container-settings");'>
               <md-icon>settings</md-icon>
             </md-icon-button>
+
         </left-bar>
 
         <container class="container-main">
@@ -152,7 +153,7 @@
             </script>
 
             <p style="display: flex;">
-              <md-outlined-text-field type="number" label="步数" id="setps-slider" value="20"  ></md-outlined-text-field>
+              <md-outlined-text-field type="number" label="步数" id="setps-slider" value="15"  ></md-outlined-text-field>
             </p>
 
             <!-- <p>
@@ -203,17 +204,57 @@
         <container class="container-download" style="display: none;">
           <h1>模型下载</h1>
           <md-list id="model-list">
+
             <md-list-item>
               <md-list-item-text>Flux1 (dev) fp8</md-list-item-text>
+              <div slot="supporting-text">16.0 GB</div>
               <md-icon slot="start">deployed_code</md-icon>
-              <md-text-button slot="end" onclick="downloadModel('https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors')">下载</md-text-button>
-
+              <md-text-button slot="end" onclick="
+              downloadModel([
+                ['/checkpoints', 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors']
+              ]);
+            ">下载</md-text-button>
             </md-list-item>
+
             <md-list-item>
               <md-list-item-text>Flux1 (Schnell) fp8</md-list-item-text>
+              <div slot="supporting-text">16.0 GB</div>
               <md-icon slot="start">deployed_code</md-icon>
-                <md-text-button slot="end" onclick="downloadModel('https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors')">下载</md-text-button>
+                <md-text-button slot="end" onclick="
+                downloadModel([
+                  ['/checkpoints', 'https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors']
+                ]);
+              ">下载</md-text-button>
             </md-list-item>
+
+            <md-list-item>
+              <md-list-item-text>Flux1 (dev) GGUF</md-list-item-text>
+              <div slot="supporting-text">6.81 GB</div>
+              <md-icon slot="start">deployed_code</md-icon>
+              <md-text-button slot="end" onclick="
+                downloadModel([
+                  ['/clip', 'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors'],
+                  ['/clip', 'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors'],
+                  ['/vae', 'https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors'],
+                  ['/diffusion_models', 'https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q4_K_S.gguf']
+                ]);
+              ">下载</md-text-button>
+            </md-list-item>
+            
+            <md-list-item>
+              <md-list-item-text>Flux1 (Schnell) GGUF</md-list-item-text>
+              <div slot="supporting-text">6.78 GB</div>
+              <md-icon slot="start">deployed_code</md-icon>
+                <md-text-button slot="end" onclick="
+                downloadModel([
+                  ['/clip', 'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors'],
+                  ['/clip', 'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors'],
+                  ['/vae', 'https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors'],
+                  ['/diffusion_models', 'https://huggingface.co/city96/FLUX.1-schnell-gguf/resolve/main/flux1-schnell-Q4_K_S.gguf']
+                ]);
+              ">下载</md-text-button>
+            </md-list-item>
+
         </container>
 
         <container class="container-terminal" style="display: none;">
@@ -222,13 +263,49 @@
           </pre>
         </container>
 
-        <iframe    class="container-comfyui-web" style="display: none;" src="http://127.0.0.1:8190"></iframe>
+        <iframe class="container-comfyui-web" style="display: none;" src="http://127.0.0.1:8190"></iframe>
 
         <container class="container-settings" style="display: none;">
           <h1>设置</h1>
-          <p>
-            <md-outlined-text-field type="number" label="端口" id="port" value="8190"></md-outlined-text-field>
-          </p>
+          <md-list>
+            <md-list-item>
+              <md-icon slot="start">language</md-icon>
+              <div slot="headline">语言</div>
+              <div slot="supporting-text">设置此应用的语言。</div>              
+            </md-list-item>
+            <md-list-item>
+              <md-icon slot="start">format_color_fill</md-icon>
+              <div slot="headline">主题色</div>
+              <div slot="supporting-text">设置此应用的主题色。</div>              
+              <input slot="end" type="color" id="theme-color-input">
+            </md-list-item>
+            <md-list-item>
+              <md-icon slot="start">place_item</md-icon>
+              <div slot="headline" >Git 下载</div>
+              <div slot="supporting-text">
+                <p>如果你需要安装 ComfyUI 插件，则需要安装 Git 插件。</p>
+                <md-linear-progress style="display: none;" value="0" id="git-progress" max='100'></md-linear-progress>
+              </div>              
+              <md-switch slot="end" id="git-switch" selected></md-switch>
+            </md-list-item>
+            <md-list-item>
+              <md-icon slot="start">extension</md-icon>
+              <div slot="headline">安装 ComfyUI Manager 插件</div>
+              <div slot="supporting-text">安装 ComfyUI Manager 插件。⚠ 需重启 Gener 应用。请注意，ComfyUI Manager 不审核第三方插件的安全性，请确保通过 ComfyUI Manager 安装的第三方插件的安全性。</p></div>              
+              <md-switch slot="end" id="comfyui-manager-switch"></md-switch>
+            </md-list-item>
+            <md-list-item>
+              <md-icon slot="start">extension</md-icon>
+              <div slot="headline">安装 ComfyUI GGUF 插件</div>
+              <div slot="supporting-text">安装此插件以运行 GGUF 格式模型。⚠ 需重启 Gener 应用。</div>              
+              <md-switch slot="end" id="comfyui-gguf-switch"></md-switch>
+            </md-list-item>
+            <md-list-item>
+              <md-icon slot="start">Info</md-icon>
+              <div slot="headline">版本号</div>
+              <div slot="supporting-text">v0.1.0 dev</div>
+          </md-list-item>
+          </md-list>
         </container>
 
       </page>
