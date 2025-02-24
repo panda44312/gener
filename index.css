@@ -1,37 +1,19 @@
-body {
-    margin: 0;
-    background: var(--md-sys-color-background);
-    color: var(--app-color);
+
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    src: "Material Symbols Outlined";
 }
 
-:root {
-    --app-color: #000000;
-    --app-bg: #ffffff;
-    --md-ref-typeface-brand: 'Noto Sans SC';
-    --md-ref-typeface-plain: 'Noto Sans SC';
-    font-family: 'Noto Sans SC';
+body {
+    margin: 0;
+    font-family: "Noto Sans SC";
+    background-color:rgb(var(--mdui-color-primary), 0.1);
+    height: 100vh;
 }
 
 ::selection {
-    background-color: var(--md-sys-color-bg);
-}
-
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --app-color: #ffffff;
-        --app-bg: #222222;
-        --md-sys-color-on-surface: #ffffff;
-        --md-sys-color-background: #222222;
-        --md-icon-button-icon-color: #ffffff;
-        --md-icon-button-hover-icon-color: #ffffff;
-        --md-icon-button-focus-icon-color: #ffffff;
-        --md-icon-button-pressed-icon-color: #ffffff;
-        --md-outlined-text-field-input-text-color: #ffffff;
-        --md-outlined-field-content-font-color: #ffffff;
-        --md-outlined-select-text-field-trailing-icon-color: #ffffff;
-        --md-linear-progress-track-color: #ffffff15;
-    }
+    background-color: rgb(var(--mdui-color-primary), 0.1);
 }
 
 top-bar {
@@ -43,12 +25,14 @@ top-bar {
     justify-content: center;
 }
 
+
+
 @media (max-width: 400px) {
     right-btn .push_pin {
         display: none;
     }
     bottom-bar > span > span {
-        display: none !IMPORTANT;
+        display: none !important;
     }
 }
 
@@ -58,10 +42,9 @@ top-bar {
     }
 }
 
-top-bar md-icon svg {
+top-bar mdui-icon {
     width: 16px;
-    height: 16px;
-    user-select: none;
+    margin-right: 5px;
 }
 
 top-bar {
@@ -76,16 +59,20 @@ right-btn {
     height: 35px;
 }
 
-right-btn md-text-button md-icon {
+right-btn mdui-button mdui-icon {
     font-size: 16px;
 }
 
-right-btn md-text-button {
+right-btn mdui-button {
     width: 50px;
     -webkit-app-region: no-drag;
     border-radius: 0;
     height: 35px;
     min-height: inherit;
+}
+
+mdui-icon {
+    font-family: Material Symbols Outlined;
 }
 
 body.on {
@@ -100,28 +87,10 @@ body page {
     right: 0;
     bottom: 0;
     overflow: auto;
-    background-color: var(--app-bg);
-}
+    /* background-color: rgb(var(--mdui-color-background), 1);
+    border-radius: 1rem 1rem 0 0; */
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
 }
-
-::-webkit-scrollbar-track {
-    background-color: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: var(--md-sys-color-primary);
-    border-radius: 6px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background-color: var(--md-sys-color-primary);
-}
-
 
 .page-welcome, .page-welcome-comfyui, .page-welcome-complete {
     display: flex;
@@ -129,6 +98,8 @@ body page {
     padding-top: 5vh;
     justify-content: center;
     user-select: none;
+    background-color: rgb(var(--mdui-color-background), 1);
+    border-radius: 1rem 1rem 0 0;
 }
 
 .page-welcome container, .page-welcome-comfyui container, .page-welcome-complete container {
@@ -137,7 +108,7 @@ body page {
     width: 600px;
 }
 
-.page-welcome container md-text-button, .page-welcome-comfyui container md-text-button, .page-welcome-complete container md-text-button {
+.page-welcome container mdui-button, .page-welcome-comfyui container mdui-button, .page-welcome-complete container mdui-button {
     width: 100%;
 }
 
@@ -158,7 +129,7 @@ body page {
     margin-right: 0;
 }
 
-.app-core left-bar md-filled-icon-button, .app-core left-bar md-icon-button {
+.app-core left-bar mdui-button-icon, .app-core left-bar mdui-button-icon {
     margin-top: 0;
     min-width: 40px;
     min-height: 40px;
@@ -170,12 +141,12 @@ page h1 {
     align-items: center;
 }
 
-page h1 md-icon {
+page h1 mdui-icon {
     width: 40px;
     height: 40px;
     font-size: 40px;
     margin-right: 8px;
-    color: var(--md-sys-color-primary);
+    color: rgb(var(--mdui-color-primary));
 }
 
 .app-core container {
@@ -187,11 +158,40 @@ page h1 md-icon {
     overflow-y: hidden;
     position: relative;
     border-radius: 1rem 0 0 1rem;
-    background-color: var(--md-sys-color-bg);
+    background-color: rgb(var(--mdui-color-background), 1);
+    backdrop-filter: blur(5px);
 }
 
 .app-core container {
     flex-direction: column !important;
+}
+
+*::part(menu) {
+    max-height: 300px;
+    overflow: auto;
+}
+
+mdui-icon, *::part(menu) mdui-icon {
+    font-family: "Material Symbols Outlined" !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar, *::part(menu)::-webkit-scrollbar, *::part(input)::-webkit-scrollbar-thumb {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track, *::part(menu)::-webkit-scrollbar-track, *::part(input)::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb, *::part(menu)::-webkit-scrollbar-thumb, *::part(input)::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--mdui-color-primary));
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover, *::part(menu)::-webkit-scrollbar-thumb:hover, *::part(input)::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--mdui-color-primary));
 }
 
 .app-core buttom-bar {
@@ -203,42 +203,55 @@ page h1 md-icon {
     width: 100%;
     height: 100%;
     border: none;
-    border-radius: 1rem;
-    margin-right: 10px;
-    background-color: var(--md-sys-color-bg);
+    border-radius: 1rem 0 0 1rem;
+    /* margin-right: 10px; */
+    background-color: rgb(var(--mdui-color-background), 1);
 }
 
 .page-main container {
     display: flex;
     flex-direction: row;
     padding: 0;
-    border-radius: 1rem;
+    /* border-radius: 1; */
     overflow: auto;
     padding-left: 20px;
     padding-right: 20px;
-    margin-right: 10px;
+    /* margin-right: 10px; */
 }
+
+.page-main container #resizer {
+    width: 1px;
+    min-width: 1px;
+    cursor: ew-resize;
+    float: left;
+    border-left: 1px solid rgb(var(--mdui-color-surface-variant));
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+  }
 
 .page-main container app-left {
     display: flex;
     flex-direction: column;
     padding: 0;
-    width: 35%;
+    width: 300px;
     padding: 20px;
     align-items: stretch;
     padding-left: 0;
     padding-right: 0;
+    overflow: auto;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .page-main container app-right {
     display: grid;
     width: 65%;
     margin: 10px;
-    margin-left: 20px;
+    margin-left: 10px;
     margin-right: -10px;
     position: relative;
-    background-color: var(--md-sys-color-bg);
-    border-radius: 1rem;
     overflow: auto;
     padding: 10px;
     padding-right: 10px;
@@ -258,24 +271,23 @@ page h1 md-icon {
     padding: 0;
     margin: 0;
     border-radius: 1rem;
-    background-color: var(--md-sys-color-bg);
+    /* background-color: rgb(var(--mdui-color-primary), 0.1); */
     align-items: center;
     justify-content: center;
 }
 
-.app-core app-left md-outlined-select, .app-core app-left md-outlined-text-field, .app-core app-left md-slider, .app-core app-left md-text-button {
+.app-core app-left md-outlined-select, .app-core app-left md-outlined-text-field, .app-core app-left md-slider, .app-core app-left mdui-button {
     width: 100%;
 }
 
 
-md-list {
-    border-radius: 1rem;
+mdui-list {
     margin-bottom: 20px;
 }
-
+/* 
 md-menu[slotlistbox] {
-    background-color: var(--app-bg);
-}
+    background-color: rgb(var(--mdui-color-primary), 0.1);
+} */
 
 bottom-bar {
     position: absolute;
@@ -285,26 +297,27 @@ bottom-bar {
     height: 25px;
     display: flex;
     font-size: 12px;
-    line-height: 25px;
     padding-left: 50px;
     align-items: center;
     user-select: none;
-    z-index: -99;
+    overflow: hidden;
 }
 
 #app-core-bottom-bar span {
     display: flex;
     align-items: center;
     margin-right: 5px;
+    line-height: 25px;
 }
 
-#app-core-bottom-bar span md-icon {
+#app-core-bottom-bar mdui-icon {
     font-size: 16px;
+    margin-right: 2px;
 }
 
-left-bar md-icon-button.active {
+left-bar mdui-button-icon.active {
     position: relative;
-    background-color: var(--md-sys-color-bg);
+    background-color: rgb(var(--mdui-color-primary), 0.1);
     border-radius: 50%;
 
 }
@@ -313,7 +326,7 @@ left-bar md-icon-button.active {
     display: flex;
     flex-direction: row !important;
 }
-
+/* 
 @media (max-width: 700px) {
     #page-container container.container-main {
         display: flex;
@@ -332,14 +345,16 @@ left-bar md-icon-button.active {
     }
     
     .page-main container app-right {
-        width: calc(100% - 40px);
+        width: calc(100% - 20px);
         height: 100%;
-        min-height: 500px;
+        min-height: 80vh;
         margin: 20px;
         margin-left: 0;
         margin-right: 0;
     }
-}
+} */
+
+
 
 .app-core container {
     user-select: none;
@@ -377,69 +392,81 @@ left-bar md-icon-button.active {
     row-gap: 10px;
     padding: 0;
     margin: 0;
+    margin-left: -5px;
+    margin-right: 0;
     border-radius: 1rem;
     background: 0;
     padding-bottom: 20px;
 }
 
-@media (max-width: 400px) {
-    #history-list {
-        grid-template-columns: 1fr;
-    }
-}
 
-@media (min-width: 500px) and (max-width: 600px) {
-    #history-list {
-        grid-template-columns: 1fr 1fr;
+@media (max-width: 300px) {
+    #history-list mdui-card {
+        width: calc(100% - 10px);
+    }
+} 
+
+@media (min-width: 400px) {
+    #history-list mdui-card {
+        width: calc(50% - 10px);
     }
 }
 
 
 @media (min-width: 600px) {
-    #history-list {
-        grid-template-columns: 1fr 1fr 1fr;
+    #history-list mdui-card {
+        width: calc(33.333333333333% - 10px);
     }
 }
 
 @media (min-width: 900px) {
-    #history-list {
-        grid-template-columns: 1fr 1fr 1fr 1fr;
+    #history-list mdui-card {
+        width: calc(25% - 10px);
+
     }
 }
 
-@media (min-width: 1000px) {
-    #history-list {
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+@media (min-width: 1200px) {
+    #history-list mdui-card {
+        width: calc(20% - 10px);
     }
+} 
+
+body {
+    transform: translate3d(0, 0, 0);
+
 }
 
-#history-list md-card, #app-core-image-viewer md-card {
-    width: 100%;
+#history-list mdui-card, #app-core-image-viewer mdui-card {
     height: max-content;
     overflow: hidden;
     display: flex;
     align-items: center;
     padding: 0;
-    margin: 0;
+    margin: 5px;
     border-radius: 1rem;
     flex-wrap: wrap;
     position: relative;
 }
 
-#history-list md-card md-checkbox {
+#history-list mdui-card {
+    transition: all 0.25s;
+}
+
+#history-list mdui-card mdui-checkbox {
     opacity: 0;
     position: absolute;
-    top: 21px;
-    left: 21px;
+    top: 5px;
+    left: 5px;
     transition: opacity 0.25s;
 }
 
-#history-list md-card:hover md-checkbox {
+#history-list mdui-card:hover mdui-checkbox {
     opacity: 1;
     transition: opacity 0.25s;
 }
 
-#history-list md-card md-checkbox::after {
+#history-list mdui-card mdui-checkbox::after {
     content: '';
     display: block;
     background: transparent;
@@ -450,34 +477,36 @@ left-bar md-icon-button.active {
     position: absolute;
 }
 
-#history-list md-card img {
+#history-list mdui-card img {
     width: 100%;
     margin: auto;
     border-radius: 1rem;
     margin: 0;
 }
 
-md-circular-progress#comfy-ui-load {
-    width: 24px;
-    height: 24px;
+mdui-circular-progress#comfy-ui-load {
+    width: 16px;
+    height: 16px;
 }
 
-.ripple {
-    position: relative;
+#app-core-image-generator mdui-tab-panel box {
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .image-viewer {
     position: fixed;
     z-index: 110;
-    background: #262626e8;
+    background: #000000ac;
     left: 0;
-    top: 35px;
+    top: 0;
     right: 0;
     bottom: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: auto;
+    overflow: hidden;
     padding: 20px;
 }
 
@@ -511,24 +540,20 @@ md-circular-progress#comfy-ui-load {
     right: 20px;
 }
 
-.image-viewer-download md-icon {
+.image-viewer-download mdui-icon {
     color: #fff;
-    --md-icon-button-icon-color: #ffffff;
-    --md-icon-button-hover-icon-color: #ffffff;
-    --md-icon-button-focus-icon-color: #ffffff;
-    --md-icon-button-pressed-icon-color: #ffffff;
 }
 
 .container-history #history-list.checked {
 
 }
 
-.container-history #history-list.checked md-card md-checkbox::after {
+.container-history #history-list.checked mdui-card mdui-checkbox::after {
     width: 1000px;
     height: 1000px;
 }
 
-.container-history #history-list.checked md-card md-checkbox {
+.container-history #history-list.checked mdui-card mdui-checkbox {
     opacity: 1;
 }
 
@@ -548,15 +573,15 @@ md-circular-progress#comfy-ui-load {
 }
 
 .container-terminal {
-    background: #222222 !important;
-    background-color: #222222;
-    color: #fff !important;
-    
+    background: rgb(var(--mdui-color-background), 1) !important;    
     user-select: auto !important;
 }
 
+.container-terminal pre {
+    margin: 0;
+}
+
 .container-terminal pre code {
-    color: #fff !important;
     font-size: 16px;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -566,10 +591,10 @@ md-circular-progress#comfy-ui-load {
     white-space: pre-wrap;
 }
 
-#app-core-image-viewer md-card {
+#app-core-image-viewer mdui-card {
 }
 
-input#theme-color-input {
+#theme-color-input {
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -587,4 +612,17 @@ input[type="color" i]::-webkit-color-swatch {
 
 input[type="color" i]::-webkit-color-swatch-wrapper {
     padding: 5px;
+}
+
+.progress-item {
+    font-size: 12px;
+}
+
+.progress-item p {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+#comfy-ui-load {
+    margin-top: -4px;
 }

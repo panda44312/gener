@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-cn">
+<html class="mdui-theme-auto" lang="zh-cn">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,163 +11,221 @@
       }
     </style>
 
-    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
-    
-    <script type="importmap">
-      {
-        "imports": {
-          "@material/web/": "https://esm.run/@material/web/"
-        }
-      }
-    </script>
-    <script type="module">
-      import '@material/web/all.js';
-      import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
-  
-      document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
-    </script>
+    <link href="./mdui@2.1.3/mdui.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300" rel="stylesheet" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Noto+Serif+SC:wght@200..900&display=swap" rel="stylesheet">
     
+<!-- 
+    <link rel="stylesheet" href="node_modules/@xterm/xterm/css/xterm.css" />
+    <script src="node_modules/@xterm/xterm/lib/xterm.js"></script>
+     -->
     <link href="./index.css" rel="stylesheet" crossorigin="anonymous">
     
-  <body>
 
+    <link rel="stylesheet" href="node_modules/@xterm/xterm/css/xterm.css" />
+    <script src="node_modules/@xterm/xterm/lib/xterm.js"></script>
+    
+  <body>
+    <div id="app-bg"></div>
+    
     <top-bar>
-      <md-icon>
+      <mdui-icon>
         <svg width="100%" height="100%" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
             <g transform="matrix(0.920249,0,0,0.959243,17.9875,16.0379)">
                 <g transform="matrix(1,0,0,1,-15,-15)">
-                    <path d="M20,110L110,110" style="fill:none;stroke: var(--md-sys-color-primary);stroke-width:9.57px;"/>
+                    <path d="M20,110L110,110" style="fill:none;stroke:rgb(var(--mdui-color-primary));stroke-width:9.57px;"/>
                 </g>
                 <g transform="matrix(1,0,0,1,-15,-15)">
-                    <path d="M75,20L30,110L100,110L55,20" style="fill:none;stroke: var(--md-sys-color-primary);stroke-width:9.57px;"/>
+                    <path d="M75,20L30,110L100,110L55,20" style="fill:none;stroke:rgb(var(--mdui-color-primary));stroke-width:9.57px;"/>
                 </g>
                 <g transform="matrix(1,0,0,1,-15,-15)">
-                    <path d="M50,110L65,80L80,110" style="fill:none;stroke: var(--md-sys-color-primary);stroke-width:8.51px;"/>
+                    <path d="M50,110L65,80L80,110" style="fill:none;stroke:rgb(var(--mdui-color-primary));stroke-width:8.51px;"/>
                 </g>
             </g>
-        </svg>        
-      </md-icon>
+        </svg>
+      </mdui-icon>
       <span>Gener</span>
     </top-bar>
 
     <right-btn>
-      <md-text-button trailing-icon class="control-button push_pin" onclick="toggleTopmost()">
-        <md-icon>push_pin</md-icon>
-      </md-text-button>
-      <md-text-button trailing-icon class="control-button remove" onclick="minimizeWindow()">
-        <md-icon>remove</md-icon>
-      </md-text-button>
-      <md-text-button trailing-icon class="control-button" onclick="closeWindow()">
-        <md-icon>close</md-icon>
-      </md-text-button>
+      <mdui-button variant="text" trailing-icon class="control-button push_pin" onclick="toggleTopmost()">
+        <mdui-icon name="push_pin"></mdui-icon>
+      </mdui-button variant="text">
+      <mdui-button variant="text" trailing-icon class="control-button remove" onclick="minimizeWindow()">
+        <mdui-icon name="remove"></mdui-icon>
+      </mdui-button variant="text">
+      <mdui-button variant="text" trailing-icon class="control-button" onclick="closeWindow()">
+        <mdui-icon name="close"></mdui-icon>
+      </mdui-button>
     </right-btn>
 
     <!-- 页面 -->
     <div id="page-container">
 
+      <!-- 核心 -->
       <page class="active page-main app-core">
 
         <left-bar>
-
-            <md-icon-button id="home-button" onclick='switchContainer("#home-button", "container-main");'>
-              <md-icon>home</md-icon>
-            </md-icon-button>
-            <md-icon-button id="history-button" onclick='switchContainer("#history-button", "container-history");'>
-              <md-icon>history</md-icon>
-            </md-icon-button>
-            <md-icon-button id="model-button" onclick='switchContainer("#model-button", "container-model");'>
-              <md-icon>deployed_code</md-icon>
-            </md-icon-button>
-            <md-icon-button id="download-button" onclick='switchContainer("#download-button", "container-download");'>
-              <md-icon>deployed_code_update</md-icon>
-            </md-icon-button>
-            <md-icon-button id="comfyui-web-button" onclick='switchContainer("#comfyui-web-button", "container-comfyui-web");'>
-             <md-icon>build</md-icon>
-            </md-icon-button>
-            <md-icon-button id="terminal-button" onclick='switchContainer("#terminal-button", "container-terminal");' style="margin-top: auto;">
-              <md-icon>terminal</md-icon>
-            </md-icon-button>
-            <md-icon-button id="refresh-button" onclick='loadAppMain(); document.querySelector(".container-comfyui-web").src = `http://127.0.0.1:${port}`;'>
-              <md-icon>refresh</md-icon>
-            </md-icon-button>
-            <md-icon-button id="settings-button" onclick='switchContainer("#settings-button", "container-settings");'>
-              <md-icon>settings</md-icon>
-            </md-icon-button>
+            <mdui-button-icon id="home-button" onclick='switchContainer("#home-button", "container-main");'>
+              <mdui-icon name="home"></mdui-icon>
+            </mdui-button-icon>
+            <mdui-button-icon id="history-button" onclick='switchContainer("#history-button", "container-history");'>
+              <mdui-icon name="history"></mdui-icon>
+            </mdui-button-icon>
+            <mdui-button-icon id="model-button" onclick='switchContainer("#model-button", "container-model");'>
+              <mdui-icon name="deployed_code"></mdui-icon>
+            </mdui-button-icon>
+            <mdui-button-icon id="download-button" onclick='switchContainer("#download-button", "container-download");'>
+              <mdui-icon name="file_download"></mdui-icon>
+            </mdui-button-icon>
+            <mdui-button-icon id="comfyui-web-button" onclick='switchContainer("#comfyui-web-button", "container-comfyui-web");'>
+             <mdui-icon name="build"></mdui-icon>
+            </mdui-button-icon>
+            <mdui-button-icon id="terminal-button" onclick='switchContainer("#terminal-button", "container-terminal");' style="margin-top: auto;">
+              <mdui-icon name="terminal"></mdui-icon>
+            </mdui-button-icon>
+            <mdui-button-icon id="refresh-button" onclick='loadAppMain(); document.querySelector(".container-comfyui-web").src = `http://127.0.0.1:${port}`;'>
+              <mdui-icon name="refresh"></mdui-icon>
+            </mdui-button-icon>
+            <mdui-button-icon id="settings-button" onclick='switchContainer("#settings-button", "container-settings");'>
+              <mdui-icon name="settings"></mdui-icon>
+            </mdui-button-icon>
 
         </left-bar>
 
-        <container class="container-main">
+        <container class="container-main"  style="display: none;">
 
           <app-left id="app-core-image-generator">
 
-            <p>
-              <md-outlined-select label="模型" outlined id="model-select"></md-outlined-select>
-            </p>
+            <mdui-tabs value="a-1">
+              <mdui-tab value="a-1">基本</mdui-tab>
+              <mdui-tab value="b-2">高级</mdui-tab>
+            
+              <mdui-tab-panel slot="panel" value="a-1">
 
-            <p style="position: relative;">
-              <md-icon-button id="image-load-btn" style="position: absolute; top: 0; right: 0; z-index: 33;">
-                <md-icon>add_photo_alternate</md-icon>
-              </md-icon-button>
-              <md-outlined-text-field id="prompt" type="textarea" label="提示词" rows="5">
-              </md-outlined-text-field>
-            </p>
+                <box>
+                    
+                  <p>
+                    <mdui-select label="模型" variant="outlined" id="model-select"></mdui-select>
+                  </p>
 
-            <p>
-              <md-outlined-select label="尺寸" outlined value="1024x1024" id="size-select" onchange="toggleCustomSize()">
-                <md-select-option value="1024x1024"><md-icon slot="start">crop_square</md-icon>1:1 (1024x1024)</md-select-option>
-                <md-select-option value="768x768"  ><md-icon slot="start">crop_square</md-icon>1:1 (768x768)</md-select-option>
-                <md-select-option value="800x1000" ><md-icon slot="start">crop_free</md-icon>4:5 (800x1000)</md-select-option>
-                <md-select-option value="1280x720" ><md-icon slot="start">crop_16_9</md-icon>16:9 (1280x720)</md-select-option>
-                <md-select-option value="720x1280" ><md-icon slot="start">crop_9_16</md-icon>9:16 (720x1280)</md-select-option>
-                <md-select-option value="768x1024" ><md-icon slot="start">crop_free</md-icon>3:4 (768x1024)</md-select-option>
-                <md-select-option value="848x1264"><md-icon slot="start">crop_free</md-icon>2:3 (848x1264)</md-select-option>
-                <md-select-option value="1584x672"><md-icon slot="start">crop_free</md-icon>2.35:1 (1584x672)</md-select-option>
-                <md-select-option value="custom" ><md-icon slot="start">crop_free</md-icon>自定义</md-select-option>
-              </md-outlined-select>
-            </p>
+                  <p style="position: relative;">
+                    <mdui-text-field variant="outlined" id="prompt" type="textarea" label="提示词" rows="4"></mdui-text-field>
+                  </p>
 
-            <p style="display: none;" id="width_box">
-              <md-outlined-text-field type="number" label="宽" id="width-num" value="1024"  style="margin-right: 10px;"  suffix-text="px"></md-outlined-text-field>
-              <md-outlined-text-field type="number" label="长" id="height-num" value="1024"   style="margin-left: 10px;"  suffix-text="px"></md-outlined-text-field>
-            </p>
+                  <p>
+                    <mdui-select label="尺寸" variant="outlined" value="1024x1024" id="size-select" onchange="toggleCustomSize()">
+                      <mdui-menu-item value="1024x1024" icon="crop_square">1:1 (1024x1024)</mdui-menu-item>
+                      <mdui-menu-item value="768x768"   icon="crop_square">1:1 (768x768)</mdui-menu-item>
+                      <mdui-menu-item value="800x1000"  icon="crop_portrait">4:5 (800x1000)</mdui-menu-item>
+                      <mdui-menu-item value="1280x720"  icon="crop_16_9">16:9 (1280x720)</mdui-menu-item>
+                      <mdui-menu-item value="720x1280"  icon="crop_9_16">9:16 (720x1280)</mdui-menu-item>
+                      <mdui-menu-item value="768x1024"  icon="crop_portrait">3:4 (768x1024)</mdui-menu-item>
+                      <mdui-menu-item value="848x1264" icon="crop_portrait">2:3 (848x1264)</mdui-menu-item>
+                      <mdui-menu-item value="1584x672" icon="crop_7_5">2.35:1 (1584x672)</mdui-menu-item>
+                      <mdui-menu-item value="custom"  icon="crop_free">自定义</mdui-menu-item>
+                    </mdui-select>
+                  </p>
 
-            <p style="display: flex;" id="num_text_box">
-              <md-outlined-text-field type="number" label="单次生成个数" id="batch-size" value="1"  style="margin-right: 10px;"></md-outlined-text-field>
-              <md-outlined-text-field type="number" label="生成批次" id="batch-size-a" value="1"   style="margin-left: 10px;"></md-outlined-text-field>
-            </p>
+                  <p style="display: none;" id="width_box">
+                    <mdui-text-field variant="outlined" type="number" label="宽" id="width-num" value="1024"  style="margin-right: 10px;"  suffix-text="px"></mdui-text-field>
+                    <mdui-text-field variant="outlined" type="number" label="长" id="height-num" value="1024"   style="margin-left: 10px;"  suffix-text="px"></mdui-text-field>
+                  </p>
 
-            <script>
-              function toggleCustomSize() {
-                const sizeSelect = document.getElementById('size-select');
-                const widthBox = document.getElementById('width_box');
-                if (sizeSelect.value === 'custom') {
-                  widthBox.style.display = 'flex';
-                } else {
-                  widthBox.style.display = 'none';
-                }
-              }
-            </script>
+                  <p style="display: flex;" id="num_text_box">
+                    <mdui-text-field variant="outlined" type="number" label="单次生成个数" id="batch-size" value="1"  style="margin-right: 10px;"></mdui-text-field>
+                    <mdui-text-field variant="outlined" type="number" label="生成批次" id="batch-size-a" value="1"   style="margin-left: 10px;"></mdui-text-field>
+                  </p>
 
-            <p style="display: flex;">
-              <md-outlined-text-field type="number" label="步数" id="setps-slider" value="15"  ></md-outlined-text-field>
-            </p>
+                  <script>
+                    function toggleCustomSize() {
+                      const sizeSelect = document.getElementById('size-select');
+                      const widthBox = document.getElementById('width_box');
+                      if (sizeSelect.value === 'custom') {
+                        widthBox.style.display = 'flex';
+                      } else {
+                        widthBox.style.display = 'none';
+                      }
+                    }
+                  </script>
 
-            <!-- <p>
-              <md-outlined-text-field type="number" label="图片参考比例" id="image-a" value="1" ></md-outlined-text-field>
-            </p> -->
+                  <p style="display: flex;">
+                    <mdui-text-field variant="outlined" type="number" label="步数" id="setps-slider" value="15"  ></mdui-text-field>
+                  </p>
+                </mdui-tab-panel>
+                </box>
+
+              <mdui-tab-panel slot="panel" value="b-2">
+                
+                <box>
+
+                  <p style="position: relative;">
+                    <mdui-text-field variant="outlined" id="prompt2" type="textarea" label="负面提示词" rows="4"></mdui-text-field>
+                  </p>
+
+                  <p style="display: flex;">
+                    <mdui-text-field variant="outlined" label="CFG Scale" variant="outlined" id="cfg-scale-select"  value="8.0"></mdui-text-field>
+                  </p>
+
+                  <p style="display: flex;">
+                    <mdui-select variant="outlined" label="采样器" variant="outlined" id="cfg-scale-select" value="euler">
+                      <mdui-menu-item value="euler">euler</mdui-menu-item>
+                      <mdui-menu-item value="euler_cfg_pp">euler_cfg_pp</mdui-menu-item>
+                      <mdui-menu-item value="euler_ancestral">euler_ancestral</mdui-menu-item>
+                      <mdui-menu-item value="euler_ancestral_cfg_pp">euler_ancestral_cfg_pp</mdui-menu-item>
+                      <mdui-menu-item value="heun">heun</mdui-menu-item>
+                      <mdui-menu-item value="heunpp2">heunpp2</mdui-menu-item>
+                      <mdui-menu-item value="dpm_2">dpm_2</mdui-menu-item>
+                      <mdui-menu-item value="dpm_2_ancestral">dpm_2_ancestral</mdui-menu-item>
+                      <mdui-menu-item value="Ims">Ims</mdui-menu-item>
+                      <mdui-menu-item value="dpm_fast">dpm_fast</mdui-menu-item>
+                      <mdui-menu-item value="dpm_adaptive">dpm_adaptive</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_2s_ancestral">dpmpp_2s_ancestral</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_2s_ancestral_cfg_pp">dpmpp_2s_ancestral_cfg_pp</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_sde">dpmpp_sde</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_sde_gpu">dpmpp_sde_gpu</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_2m">dpmpp_2m</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_2m_cfg_pp">dpmpp_2m_cfg_pp</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_2m_sde">dpmpp_2m_sde</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_2m_sde_gpu">dpmpp_2m_sde_gpu</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_3m_sde">dpmpp_3m_sde</mdui-menu-item>
+                      <mdui-menu-item value="dpmpp_3m_sde_gpu">dpmpp_3m_sde_gpu</mdui-menu-item>
+                      <mdui-menu-item value="ddpm">ddpm</mdui-menu-item>
+                      <mdui-menu-item value="Icm">Icm</mdui-menu-item>
+                      <mdui-menu-item value="ipndm">ipndm</mdui-menu-item>
+                      <mdui-menu-item value="ipndm_v">ipndm_v</mdui-menu-item>
+                      <mdui-menu-item value="deis">deis</mdui-menu-item>
+                      <mdui-menu-item value="ddim">ddim</mdui-menu-item>
+                      <mdui-menu-item value="uni_pc">uni_pc</mdui-menu-item>
+                      <mdui-menu-item value="uni_pc_bh2">uni_pc_bh2</mdui-menu-item>
+                    </mdui-select>
+                  </p>
+
+                  <p style="display: flex;">
+                    <mdui-text-field variant="outlined" label="种子" variant="outlined" id="cfg-scale-select"  value="12242323242313"></mdui-text-field>
+                  </p>
+                </box>
+
+              </mdui-tab-panel>
+          </mdui-tabs>
 
             <p style="margin-top: auto;">
-              <md-linear-progress id="progress-bar" value="0" max="1"></md-linear-progress>
+              <mdui-linear-progress id="progress-bar" value="0" max="1"></md-linear-progress>
             </p>
 
             <p>
-              <md-text-button disabled="true" id="generate-button">生成</md-text-button>
+              <mdui-button variant="text" disabled="true" id="generate-button">
+                <mdui-icon slot="end-icon" name="auto_fix_high"></mdui-icon>生成
+              </mdui-button>
             </p>
           </app-left>
+
+          <div id="resizer"></div>
 
           <app-right id="app-core-image-viewer"></app-left>
 
@@ -178,10 +236,10 @@
           <h1>历史记录</h1>
 
           <div class="container-history-floating-menu">
-            <md-checkbox id="select-all"></md-checkbox>
-            <md-icon-button id="delete-selected">
-                <md-icon>delete</md-icon>
-            </md-icon-button>
+            <mdui-checkbox id="select-all"></mdui-checkbox>
+            <mdui-button-icon id="delete-selected">
+                <mdui-icon name="delete"></mdui-icon>
+            </mdui-button-icon>
           </div>
 
           <div id="history-list"></div>
@@ -192,68 +250,68 @@
           <h1>模型文件管理</h1>
           <p style="margin: 0; display: flex; align-items: center;">
             <span style="display: block; width: 80px;">路径：</span>
-            <md-outlined-text-field disabled="true" id="model-path" style="zoom: 60%; width: 100%;"></md-outlined-text-field>
-            <md-text-button id="model-path-button">打开</md-text-button>
+            <mdui-text-field variant="outlined" disabled="true" id="model-path" style="zoom: 60%; width: 100%;"></mdui-text-field>
+            <mdui-button variant="text" id="model-path-button">打开</mdui-button>
           </p>
           <p>
-            <md-list id="model-list"></md-list>
+            <mdui-list id="model-list"></mdui-list>
           </p>
 
         </container>
 
         <container class="container-download" style="display: none;">
           <h1>模型下载</h1>
-          <md-list id="model-list">
+          <mdui-list id="model-list">
 
-            <md-list-item>
-              <md-list-item-text>Flux1 (dev) fp8</md-list-item-text>
-              <div slot="supporting-text">16.0 GB</div>
-              <md-icon slot="start">deployed_code</md-icon>
-              <md-text-button slot="end" onclick="
+            <mdui-list-item rounded>
+              <mdui-list-item-text>Flux1 (dev) fp8</mdui-list-item-text>
+              <div slot="description">16.0 GB</div>
+              <mdui-icon slot="icon">science</mdui-icon>
+              <mdui-button variant="text" slot="end-icon" onclick="
               downloadModel([
                 ['/checkpoints', 'https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors']
               ]);
-            ">下载</md-text-button>
-            </md-list-item>
+            ">下载</mdui-button>
+            </mdui-list-item>
 
-            <md-list-item>
-              <md-list-item-text>Flux1 (Schnell) fp8</md-list-item-text>
-              <div slot="supporting-text">16.0 GB</div>
-              <md-icon slot="start">deployed_code</md-icon>
-                <md-text-button slot="end" onclick="
+            <mdui-list-item rounded>
+              <mdui-list-item-text>Flux1 (Schnell) fp8</mdui-list-item-text>
+              <div slot="description">16.0 GB</div>
+              <mdui-icon slot="icon">science</mdui-icon>
+                <mdui-button variant="text" slot="end-icon" onclick="
                 downloadModel([
                   ['/checkpoints', 'https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors']
                 ]);
-              ">下载</md-text-button>
-            </md-list-item>
+              ">下载</mdui-button>
+            </mdui-list-item>
 
-            <md-list-item>
-              <md-list-item-text>Flux1 (dev) GGUF</md-list-item-text>
-              <div slot="supporting-text">6.81 GB</div>
-              <md-icon slot="start">deployed_code</md-icon>
-              <md-text-button slot="end" onclick="
+            <mdui-list-item rounded>
+              <mdui-list-item-text>Flux1 (dev) GGUF</mdui-list-item-text>
+              <div slot="description">6.81 GB</div>
+              <mdui-icon slot="icon">science</mdui-icon>
+              <mdui-button variant="text" slot="end-icon" onclick="
                 downloadModel([
                   ['/clip', 'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors'],
                   ['/clip', 'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors'],
                   ['/vae', 'https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors'],
                   ['/diffusion_models', 'https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q4_K_S.gguf']
                 ]);
-              ">下载</md-text-button>
-            </md-list-item>
+              ">下载</mdui-button>
+            </mdui-list-item>
             
-            <md-list-item>
-              <md-list-item-text>Flux1 (Schnell) GGUF</md-list-item-text>
-              <div slot="supporting-text">6.78 GB</div>
-              <md-icon slot="start">deployed_code</md-icon>
-                <md-text-button slot="end" onclick="
+            <mdui-list-item rounded>
+              <mdui-list-item-text>Flux1 (Schnell) GGUF</mdui-list-item-text>
+              <div slot="description">6.78 GB</div>
+              <mdui-icon slot="icon">science</mdui-icon>
+                <mdui-button variant="text" slot="end-icon" onclick="
                 downloadModel([
                   ['/clip', 'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors'],
                   ['/clip', 'https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors'],
                   ['/vae', 'https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors'],
                   ['/diffusion_models', 'https://huggingface.co/city96/FLUX.1-schnell-gguf/resolve/main/flux1-schnell-Q4_K_S.gguf']
                 ]);
-              ">下载</md-text-button>
-            </md-list-item>
+              ">下载</mdui-button>
+            </mdui-list-item>
 
         </container>
 
@@ -267,125 +325,131 @@
 
         <container class="container-settings" style="display: none;">
           <h1>设置</h1>
-          <md-list>
-            <md-list-item>
-              <md-icon slot="start">language</md-icon>
-              <div slot="headline">语言</div>
-              <div slot="supporting-text">设置此应用的语言。</div>              
-            </md-list-item>
-            <md-list-item>
-              <md-icon slot="start">format_color_fill</md-icon>
-              <div slot="headline">主题色</div>
-              <div slot="supporting-text">设置此应用的主题色。</div>              
-              <input slot="end" type="color" id="theme-color-input">
-            </md-list-item>
-            <md-list-item>
-              <md-icon slot="start">place_item</md-icon>
-              <div slot="headline" >Git 下载</div>
-              <div slot="supporting-text">
+          <mdui-list>
+            <mdui-list-item rounded>
+              <mdui-icon slot="icon">language</mdui-icon>
+              语言
+              <div slot="description">设置此应用的语言。</div>              
+            </mdui-list-item>
+            <mdui-list-item rounded>
+              <mdui-icon slot="icon">format_color_fill</mdui-icon>
+              主题色
+              <div slot="description">设置此应用的主题色。</div>              
+              <input slot="end-icon" type="color" id="theme-color-input">
+            </mdui-list-item>
+            <mdui-list-item rounded>
+              <mdui-icon slot="icon">place_item</mdui-icon>
+              Git 下载
+              <div slot="description">
                 <p>如果你需要安装 ComfyUI 插件，则需要安装 Git 插件。</p>
                 <md-linear-progress style="display: none;" value="0" id="git-progress" max='100'></md-linear-progress>
               </div>              
-              <md-switch slot="end" id="git-switch" selected></md-switch>
-            </md-list-item>
-            <md-list-item>
-              <md-icon slot="start">extension</md-icon>
-              <div slot="headline">安装 ComfyUI Manager 插件</div>
-              <div slot="supporting-text">安装 ComfyUI Manager 插件。⚠ 需重启 Gener 应用。请注意，ComfyUI Manager 不审核第三方插件的安全性，请确保通过 ComfyUI Manager 安装的第三方插件的安全性。</p></div>              
-              <md-switch slot="end" id="comfyui-manager-switch"></md-switch>
-            </md-list-item>
-            <md-list-item>
-              <md-icon slot="start">extension</md-icon>
-              <div slot="headline">安装 ComfyUI GGUF 插件</div>
-              <div slot="supporting-text">安装此插件以运行 GGUF 格式模型。⚠ 需重启 Gener 应用。</div>              
-              <md-switch slot="end" id="comfyui-gguf-switch"></md-switch>
-            </md-list-item>
-            <md-list-item>
-              <md-icon slot="start">Info</md-icon>
-              <div slot="headline">版本号</div>
-              <div slot="supporting-text">v0.1.0 dev</div>
-          </md-list-item>
-          </md-list>
+              <mdui-switch slot="end-icon" id="git-switch" selected></mdui-switch>
+            </mdui-list-item>
+            <mdui-list-item rounded>
+              <mdui-icon slot="icon">extension</mdui-icon>
+              安装 ComfyUI Manager 插件
+              <div slot="description">安装 ComfyUI Manager 插件。⚠ 需重启 Gener 应用。请注意，ComfyUI Manager 不审核第三方插件的安全性，请确保通过 ComfyUI Manager 安装的第三方插件的安全性。</p></div>              
+              <mdui-switch slot="end-icon" id="comfyui-manager-switch"></mdui-switch>
+            </mdui-list-item>
+            <mdui-list-item rounded>
+              <mdui-icon slot="icon">extension</mdui-icon>
+              安装 ComfyUI GGUF 插件
+              <div slot="description">安装此插件以运行 GGUF 格式模型。⚠ 需重启 Gener 应用。</div>              
+              <mdui-switch slot="end-icon" id="comfyui-gguf-switch"></mdui-switch>
+            </mdui-list-item>
+            <mdui-list-item rounded>
+              <mdui-icon slot="icon">info</mdui-icon>
+              版本号
+              <div slot="description">v2.0.0 dev</div>
+          </mdui-list-item>
+          </mdui-list>
         </container>
 
       </page>
       
+      <!-- 底栏 -->
       <bottom-bar id="app-core-bottom-bar">
         <span>
-          <md-circular-progress value="0.25" id="comfy-ui-load"></md-circular-progress>
+          <mdui-circular-progress value="0.25" id="comfy-ui-load"></mdui-circular-progress>
         </span>
         <span>
-          <md-icon>computer</md-icon>
+          <mdui-icon name="computer"></mdui-icon>
           <span id="cpu-load"></span>
         </span>
         <span>
-          <md-icon>memory</md-icon>
+          <mdui-icon name="memory"></mdui-icon>
           <span id="memory-usage"></span>
         </span>
         <span>
-          <md-icon id="mode_fan">mode_fan</md-icon>
+          <mdui-icon name="mode_fan">mode_fan</mdui-icon>
           <span id="gpu-load"></span>
         </span>
         <span>
-          <md-icon>memory</md-icon>
+          <mdui-icon name="memory"></mdui-icon>
           <span id="gpu-memory-used"></span>
         </span>
       </bottom-bar>
 
+      <!-- 欢迎页 -->
       <page class="page-welcome" style="display: none;">
         <container>
           <svg viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
             <g transform="matrix(1.0989,0,0,1.04167,0,0)">
-                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="var(--md-sys-color-primary)" text-anchor="middle">
+                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="rgb(var(--mdui-color-primary), 1)" text-anchor="middle">
                   new_releases
                 </text>
-                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:var(--md-sys-color-primary);fill-opacity:0.18;"/>
+                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:rgb(var(--mdui-color-primary));fill-opacity:0.18;"/>
             </g>
           </svg>
           <h1>欢迎</h1>
           <p>Gener 是一款桌面上的AI绘图（ComfyUI）的图形界面应用，你可以使用 Gener 来文生图、图生图，以及更多...</p>
-          <md-text-button id="page-welcome-next">下一步</md-text-button>
+          <mdui-button variant="text" id="page-welcome-next">下一步</mdui-button>
         </container>
       </page>
-      
+
       <page class="page-welcome-comfyui" style="display: none;">
         <container>
           <svg viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
             <g transform="matrix(1.0989,0,0,1.04167,0,0)">
-                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="var(--md-sys-color-primary)" text-anchor="middle">
+                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="rgb(var(--mdui-color-primary), 1)" text-anchor="middle">
                   deployed_code_update
                 </text>
-                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:var(--md-sys-color-primary);fill-opacity:0.18;"/>
+                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:rgb(var(--mdui-color-primary));fill-opacity:0.18;"/>
             </g>
           </svg>
           <h1>下载 ComfyUI</h1>
           <p>为了使 Gener 能够正常工作，你需要下载 ComfyUI。</p>
           <p>
-            <md-linear-progress id="progress-bar" value="0" max="100"></md-linear-progress>
+            <mdui-linear-progress id="progress-bar" value="0" max="100"></mdui-linear-progress>
           </p>
-          <md-text-button disabled>继续</md-text-button>
+          <mdui-button variant="text" disabled>继续</mdui-button>
         </container>
       </page>
+
       <page class="page-welcome-complete" style="display: none;">
         <container>
           <svg viewBox="0 0 1000 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
             <g transform="matrix(1.0989,0,0,1.04167,0,0)">
-                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="var(--md-sys-color-primary)" text-anchor="middle">
+                <text x="450" y="335" font-family="Material Symbols Outlined" font-size="200" fill="rgb(var(--mdui-color-primary), 1)" text-anchor="middle">
                   outbox
                 </text>
-                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:var(--md-sys-color-primary);fill-opacity:0.18;"/>
+                <path d="M910,38.4L910,441.6C910,462.794 893.69,480 873.6,480L36.4,480C16.31,480 0,462.794 0,441.6L0,38.4C0,17.206 16.31,0 36.4,0L873.6,0C893.69,0 910,17.206 910,38.4Z" style="fill:rgb(var(--mdui-color-primary));fill-opacity:0.18;"/>
             </g>
           </svg>
           <h1>解压 ComfyUI</h1>
           <p id="next_text">已经成功下载了 ComfyUI ，正在解压中：</p>
           <p>
-            <md-linear-progress id="progress-bar" indeterminate></md-linear-progress>
+            <mdui-linear-progress id="progress-bar" indeterminate></mdui-linear-progress>
           </p>
-          <md-text-button disabled id="next">继续</md-text-button>
+          <mdui-button variant="text" disabled id="next">继续</mdui-button>
         </container>
       </page>
+
     </div>
 
+    <script src="./mdui@2.1.3/mdui.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/waterfall.js/1.0.2/waterfall.min.js"></script>
     <script src="./index.js"></script>
   </body>
 </html>

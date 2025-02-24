@@ -7,6 +7,7 @@ const { execSync } = require('child_process');
 const child_process = require('child_process');
 const http = require('http');
 const { console } = require('inspector');
+const { dlopen } = require('process');
 
 const getRandomPort = () => {
     const min = 1024;
@@ -19,7 +20,7 @@ const getRandomPort = () => {
     return port;
 };
 
-const port = getRandomPort();
+let port = getRandomPort() ;
 
 //全局变量
 
@@ -75,8 +76,8 @@ ipcRenderer.on('userDataPath', (event, configPath) => {
     })();    
 
 
-    //载入
-    window.addEventListener('DOMContentLoaded', () => {
+    // //载入
+    // window.addEventListener('DOMContentLoaded', () => {
         document.body.classList.add('on');
         
         //检测 ../ComfyUI文件夹是否存在，不存在就下载并解压
@@ -84,46 +85,68 @@ ipcRenderer.on('userDataPath', (event, configPath) => {
 
         //载入主题
         let themeColor = configManager.getConfig('themeColor', '#2196f3');
+        console.log(`Theme color: ${themeColor}`);
         const themeColorInput = $("#theme-color-input");
         themeColorInput.value = themeColor;
-        let   themeColorStyle = document.createElement("div");
-        themeColorStyle.innerHTML = `
-            <style>
-                :root {
-                    --md-sys-color-primary: ${themeColor};
-                    --md-sys-color-secondary: ${themeColor};
-                    --md-list-container-color: ${themeColor}10;
-                    --md-menu-item-selected-container-color: ${themeColor}30;
-                    --md-sys-color-bg: ${themeColor}10;
-                    --md-menu-container-color:  var(--app-bg);
-                }
-        `;
-        document.head.appendChild(themeColorStyle);
+        
+        mdui.setColorScheme(`${themeColor}`);
+
 
         themeColorInput.oninput = () => {
             configManager.updateConfig('themeColor', themeColorInput.value);
-            let   themeColor = configManager.getConfig('themeColor', '#2196f3');
-            let   themeColorStyle = document.createElement("div");
-            themeColorStyle.innerHTML = `
-                <style>
-                    :root {
-                        --md-sys-color-primary: ${themeColor};
-                        --md-sys-color-secondary: ${themeColor};
-                        --md-list-container-color: ${themeColor}10;
-                        --md-menu-item-selected-container-color: ${themeColor}30;
-                        --md-sys-color-bg: ${themeColor}10;
-                    }
-            `;
-            document.head.appendChild(themeColorStyle);
+            mdui.setColorScheme(`${themeColorInput.value}`);
         }
 
         if (!fs.existsSync(ComfyUIDir)) {
             getComfyUIDir();
         } else {
-            console.log('ComfyUI已存在，直接跳过下载和解压过程。');
-            loadApp();
+            console.log('ComfyUI 已存在，直接跳过下载和解压过程。');
+
+            let resizer = $('.container-main #resizer');
+            let leftPanel = $('.container-main #app-core-image-generator');
+
+            // 标志是否正在拖动
+            let isResizing = false;
+    
+            // 记录鼠标按下时的初始位置与左侧面板的初始宽度
+            let startX, startWidth;
+    
+            resizer.addEventListener('mousedown', function(e) {
+            isResizing = true;
+            startX = e.clientX;                           // 记录鼠标按下时的X坐标
+            startWidth = leftPanel.getBoundingClientRect().width; // 记录左侧面板的当前宽度
+            
+            // 禁止文本选择
+            document.body.style.userSelect = 'none';
+            });
+    
+            // 鼠标移动时计算偏移量，并调整宽度
+            document.addEventListener('mousemove', function(e) {
+                if (!isResizing) return;
+                
+                // 计算鼠标移动的偏移量
+                const offset = e.clientX - startX - 20;
+                
+                // 根据初始宽度加上偏移量计算新的宽度
+                let newWidth = startWidth + offset;
+                
+                // 限制宽度范围（根据需要调整最小、最大值）
+                if (newWidth < 200) newWidth = 200;
+                if (newWidth > 800) newWidth = 800;
+                
+                leftPanel.style.minWidth = newWidth + 'px';
+            });
+    
+            // 鼠标释放时停止拖动
+            document.addEventListener('mouseup', function() {
+                isResizing = false;
+                document.body.style.userSelect = 'auto';
+            });    
+
+            //载入主页面
+             loadApp();
         }
-    });
+    // });
 });
 
 const $ = selector => {
@@ -167,7 +190,6 @@ const switchContainer = (e, pageName) => {
         ee.classList.add("active");
     }
 }
-
 
 const terminal = (log) => {
     $("#terminal").textContent = $("#terminal").textContent += "\n" + log;
@@ -358,111 +380,182 @@ const loadApp = () => {
     sysinfo();
     setInterval(sysinfo, 1000);
 
-
-    // 检测用户是否有显卡
-    let comfyUIProcess;
-
     const generateButton = $("#app-core-image-generator #generate-button");
 
-    Setrat = async () => {
+    const Setrat = async () => {
 
-        exec('taskkill /f /im python.exe');
-        //人为等待一段时间
-        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-        await delay(20);
-        console.log("等待结束，继续执行...");
-
+        // exec('taskkill /f /im python.exe');
+        // // 人为等待一段时间
+        // const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+        // await delay(20);
+        // console.log("等待结束，继续执行...");
+    
         exec('wmic path win32_VideoController get name', (err, stdout, stderr) => {
             if (err) {
                 openDialog('error', '显卡检测失败', '显卡检测过程中发生错误。');
                 return;
             }
             if (stdout.includes("NVIDIA")) {
-                console.log("NVIDIA显卡检测通过。");
+                console.log("NVIDIA 显卡检测通过。");
                 const command = `"python_embeded\\python.exe" -s ComfyUI\\main.py --fast --port ${port}`;
                 comfyUIProcess = exec(command, {
                     cwd: comfyUIPathPython
                 });
-
+    
                 comfyUIProcess.stderr.on('data', (data) => {
-                    console.log(`stderr: ${data}`);
-                    terminal(data)
-
-                    if($("#comfy-ui-load").value != 1)
+                    console.log(`${data}`);
+                    terminal(data);
+    
+                    if ($("#comfy-ui-load").value != 1)
                         $("#comfy-ui-load").value = $("#comfy-ui-load").value + 0.05;
-
+    
                     if (data.includes(`To see the GUI go to: http://127.0.0.1:${port}`)) {
                         $(".container-comfyui-web").src = `http://127.0.0.1:${port}`;
                         $("#comfy-ui-load").value = 1;
                         generateButton.disabled = false;
-                        loadAppMain()
+                        loadAppMain();
                     }
-
                 });
+    
                 comfyUIProcess.on('close', (code) => {
                     if (code !== 0) {
-                        openDialog('error', '启动失败', 'ComfyUI启动失败。');
+                        openDialog('error', '启动失败', `ComfyUI 进程异常退出。`);
                     } else {
                         console.log("ComfyUI started successfully with NVIDIA GPU.");
                     }
                 });
             } else {
-                openDialog('error', '显卡检测失败', '检测到您的电脑没有 NVIDIA 显卡， ComfyUI 将使用 CPU 运行，速度可能会较慢。');
+                openDialog('error', '显卡检测失败', '检测到您的电脑没有 NVIDIA 显卡， 无法继续运行。');
                 console.log("No NVIDIA GPU detected. Starting with CPU...");
             }
         });
-
-    }
+    };
+    
+    // 当 Electron 渲染进程页面刷新或关闭时，终止子进程
+    window.addEventListener('beforeunload', () => {
+        if (comfyUIProcess && !comfyUIProcess.killed) {
+            console.log("页面刷新或关闭，正在终止子进程...");
+            // 发送 SIGTERM 信号结束子进程，或根据需要使用 'SIGKILL'
+            comfyUIProcess.kill('SIGTERM');
+        }
+    });
     
     Setrat()
+
 
     loadHistory = () => {
         const historyList = $(".container-history #history-list");
         historyList.innerHTML = ``;
-
-        //fs获取historyPath中的文件，然后显示在historyList中
+    
+        // fs获取 historyPath 中的文件，然后显示在 historyList 中
         fs.readdir(historyPath, (err, files) => {
             if (err) {
                 console.error(err);
                 return;
             }
-            files.reverse().forEach(file => {
-                if (file.endsWith('.png')) {
-                    //创建 md-card 元素
-                    const historyItem = document.createElement("md-card");
-                    historyItem.className = 'ripple';
-                    const uuid = generateUUID();
-                    historyItem.innerHTML = `
-                        <md-checkbox id="${uuid}"></md-checkbox>
-                        <md-ripple></md-ripple>
-                        <img src="http://127.0.0.1:${port}/view?filename=${file}&type=output">
-                    `;
-                    historyItem.querySelector('img').addEventListener('click', () => {
-                        openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
+            // 倒序排列文件列表
+            const filesToLoad = files.reverse();
+            let currentIndex = 0;
+            const batchSize = 10; // 每次载入的条数
+            let isLoading = false;
+    
+            // 分批载入函数
+            const loadNextBatch = () => {
+                if (isLoading) return;
+                isLoading = true;
+    
+                let count = 0;
+                const batchPromises = []; // 用于等待本批次所有图片加载完成
+                const batchCards = [];    // 记录本批次所有卡片元素
+    
+                while (currentIndex < filesToLoad.length && count < batchSize) {
+                    const file = filesToLoad[currentIndex];
+                    currentIndex++;
+                    if (file.endsWith('.png')) {
+                        // 创建 md-card 元素
+                        const historyItem = document.createElement("mdui-card");
+                        historyItem.className = 'ripple';
+                        // 初始隐藏整个卡片，使用透明度动画
+                        historyItem.style.opacity = '0';
+                        historyItem.style.transition = 'opacity 0.2s ease-in-out';
+                        const uuid = generateUUID();
+                        historyItem.innerHTML = `
+                            <mdui-checkbox id="${uuid}"></mdui-checkbox>
+                            <mdui-ripple></mdui-ripple>
+                            <img src="http://127.0.0.1:${port}/view?filename=${file}&type=output">
+                        `;
+                        
+                        // 保存卡片用于后续动画
+                        batchCards.push(historyItem);
+    
+                        // 获取图片对象，并等待图片加载完成
+                        const img = historyItem.querySelector('img');
+                        const loadPromise = new Promise(resolve => {
+                            if (img.complete) {
+                                resolve();
+                            } else {
+                                img.addEventListener('load', resolve);
+                                img.addEventListener('error', resolve);
+                            }
+                        });
+                        batchPromises.push(loadPromise);
+    
+                        // 点击图片打开查看器
+                        img.addEventListener('click', () => {
+                            openImageViewer(`http://127.0.0.1:${port}/view?filename=${file}&type=output`);
+                        });
+    
+                        // 为 checkbox 添加 change 事件
+                        historyItem.querySelector('mdui-checkbox').addEventListener('change', updateSelectAllCheckboxState);
+    
+                        // 添加到历史列表
+                        historyList.appendChild(historyItem);
+                        count++;
+                    }
+                }
+    
+                // 等待本批次所有图片加载完成后，再调用瀑布流布局，并淡入显示卡片
+                Promise.all(batchPromises).then(() => {
+                    waterfall($("#history-list"));
+                    batchCards.forEach(card => {
+                        card.style.opacity = '1';
                     });
-                    historyList.appendChild(historyItem);
+                    isLoading = false;
+                });
+            };
+    
+            // 初始载入第一批
+            loadNextBatch();
+    
+            // 监听滚动，滚动到底部时载入下一批
+            historyList.parentElement.addEventListener('scroll', () => {
+                const container = historyList.parentElement;
+                if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50) {
+                    if (currentIndex < filesToLoad.length) {
+                        loadNextBatch();
+                    }
                 }
             });
-
+    
             // Add floating menu
-            const floatingMenu = $(`.container-history-floating-menu`)
-
+            const floatingMenu = $(`.container-history-floating-menu`);
             const selectAllCheckbox = floatingMenu.querySelector('#select-all');
             const deleteSelectedButton = floatingMenu.querySelector('#delete-selected');
-
+    
             selectAllCheckbox.addEventListener('change', () => {
                 const isChecked = selectAllCheckbox.checked;
-                historyList.querySelectorAll('md-checkbox').forEach(checkbox => {
+                historyList.querySelectorAll('mdui-checkbox').forEach(checkbox => {
                     checkbox.checked = isChecked;
                 });
                 updateSelectAllCheckboxState();
             });
-
+    
             deleteSelectedButton.addEventListener('click', () => {
                 const selectedFiles = [];
-                historyList.querySelectorAll('md-checkbox').forEach(checkbox => {
+                historyList.querySelectorAll('mdui-checkbox').forEach(checkbox => {
                     if (checkbox.checked) {
-                        const file = checkbox.closest('md-card').querySelector('img').src.split('filename=')[1].split('&')[0];
+                        const file = checkbox.closest('mdui-card')
+                            .querySelector('img').src.split('filename=')[1].split('&')[0];
                         selectedFiles.push(file);
                     }
                 });
@@ -470,15 +563,20 @@ const loadApp = () => {
                     deleteHistoryItem([file]);
                 });
             });
-
-            historyList.querySelectorAll('md-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', updateSelectAllCheckboxState);
+    
+            window.addEventListener('resize', function () {
+                waterfall($("#history-list"));
             });
+    
+            setInterval(() => {
+                waterfall($("#history-list"));
+            }, 1000);
         });
-
+    
         generateUUID = () => {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                const r = Math.random() * 16 | 0,
+                      v = c === 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
         };
@@ -487,7 +585,8 @@ const loadApp = () => {
             try {
                 files.forEach(file => {
                     fs.unlinkSync(path.join(historyPath, file));
-                    const historyItem = Array.from(historyList.children).find(item => item.querySelector('img').src.includes(file));
+                    const historyItem = Array.from(historyList.children)
+                        .find(item => item.querySelector('img').src.includes(file));
                     if (historyItem) {
                         historyList.removeChild(historyItem);
                     }
@@ -500,26 +599,28 @@ const loadApp = () => {
         };
     
         updateSelectAllCheckboxState = () => {
-            const checkboxes = historyList.querySelectorAll('md-checkbox');
+            const checkboxes = historyList.querySelectorAll('mdui-checkbox');
             const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
             const selectAllCheckbox = $(`.container-history-floating-menu #select-all`);
+    
             if (checkedCheckboxes.length === 0) {
-            selectAllCheckbox.checked = false;
-            selectAllCheckbox.indeterminate = false;
-            historyList.classList.remove('checked');
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+                historyList.classList.remove('checked');
             } else if (checkedCheckboxes.length === checkboxes.length) {
-            selectAllCheckbox.checked = true;
-            selectAllCheckbox.indeterminate = false;
-            historyList.classList.add('checked');
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+                historyList.classList.add('checked');
             } else {
-            selectAllCheckbox.checked = false;
-            selectAllCheckbox.indeterminate = true;
-            historyList.classList.add('checked');
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+                historyList.classList.add('checked');
             }
         };
     }
     
-
+    
+    
     loadAppMain = () => {
 
         // modelPath载入到列表中
@@ -531,6 +632,7 @@ const loadApp = () => {
         modelSelect.innerHTML = ``;
         
         modelPathE.value = path.join(modelPath, './checkpoints/');
+
         fs.readdir(modelPathE.value, (err, files) => {
             if (err) {
                 console.error(err);
@@ -538,18 +640,18 @@ const loadApp = () => {
             }
             files.forEach(file => {
                 if (file !== 'put_checkpoints_here') {
-                    const modelItem = document.createElement("md-list-item");
+                    const modelItem = document.createElement("mdui-list-item");
                     modelItem.innerHTML = `
-                        <md-icon selected slot="start">deployed_code</md-icon>
+                        <mdui-icon selected slot="icon">deployed_code</mdui-icon>
                         <span>${file}</span>
-                        <md-text-button slot="end" onclick="deleteModel('${file}')">删除</md-text-button>
+                        <mdui-button-icon slot="end-icon" icon="delete" onclick="deleteModel('${modelPathE.value}', '${file}')"></mdui-button-icon>
                     `;
+                    modelItem.	rounded = true
                     modelList.appendChild(modelItem);
                     const modelOption = `
-                        <md-select-option value="${file}">
-                            <md-icon slot="start">deployed_code</md-icon>
+                        <mdui-menu-item value="${file}" icon="deployed_code">
                             ${file.split('.')[0]}
-                        </md-select-option>
+                        </mdui-menu-item>
                     `;
                     modelSelect.insertAdjacentHTML('beforeend', modelOption);
                 }
@@ -562,37 +664,52 @@ const loadApp = () => {
 
         //删除模型
         deleteModel = (file) => {
-                const dialog = document.createElement('md-dialog');
-                dialog.setAttribute('type', 'alert');
+                const dialog = document.createElement('mdui-dialog');
+                dialog.icon = "delete"
                 dialog.innerHTML = `
-                    <div slot="headline"><md-icon>delete</md-icon>确认删除</div>
-                    <form slot="content" id="form-id" method="dialog">
-                        您确定要删除模型 “${file}” 吗？
-                    </form>
-                    <div slot="actions">
-                        <md-text-button form="form-id" value="cancel">取消</md-text-button>
-                        <md-text-button form="form-id" value="delete">删除</md-text-button>
-                    </div>
+                    <div slot="headline">确认删除</div>
+                    您确定要删除模型 “${file}” 吗？
                 `;
+
+                const btn1 = document.createElement('mdui-button');
+                btn1.textContent = '取消';
+                
+                btn1.addEventListener('click', () => {
+                    dialog.open = false;
+                    document.body.removeChild(dialog);
+                })
+
+                dialog.appendChild(btn1);
+
+                const btn2 = document.createElement('mdui-button');
+                btn2.textContent = '删除';
+
+                btn2.addEventListener('click', () => {
+                    dialog.open = false;
+                    
+                    fs.unlink(path.join(modelPath, file), (err) => {
+                        if (err) {
+                            openDialog('error', '删除失败', '删除模型过程中发生错误。');
+                            return;
+                        }
+                        const modelItem = Array.from(modelList.children).find(item => item.querySelector('span').textContent === file);
+                        if (modelItem) {
+                            modelList.removeChild(modelItem);
+                        }
+                    });
+
+                    document.body.removeChild(dialog);
+                })
+
+                dialog.appendChild(btn2);
+
                 document.body.appendChild(dialog);
             
                 dialog.addEventListener('close', () => {
-                    if (dialog.returnValue === 'delete') {
-                        fs.unlink(path.join(modelPath, file), (err) => {
-                            if (err) {
-                                openDialog('error', '删除失败', '删除模型过程中发生错误。');
-                                return;
-                            }
-                            const modelItem = Array.from(modelList.children).find(item => item.querySelector('span').textContent === file);
-                            if (modelItem) {
-                                modelList.removeChild(modelItem);
-                            }
-                        });
-                    }
                     document.body.removeChild(dialog);
                 });
             
-                dialog.show();
+                dialog.open = true;
             }
 
         modelPathButton.onclick = () => {
@@ -611,11 +728,9 @@ const loadApp = () => {
             viewer.classList.add('image-viewer');
             viewer.innerHTML = `
                 <div class="image-viewer-overlay"></div>
-                <div class="image-viewer-content">
+                <div class="image-viewer-content" class="mdui-theme-dark">
                     <img src="${imageUrl}" alt="Image Viewer">
-                    <md-icon-button class="image-viewer-download">
-                        <md-icon>download</md-icon>
-                    </md-icon-button>
+                    <mdui-button-icon class="image-viewer-download" icon="download" variant="text" class="mdui-theme-dark"></mdui-button-icon>
                 </div>
             `;
             document.body.appendChild(viewer);
@@ -661,36 +776,38 @@ const loadApp = () => {
         });
 
         //图片生成逻辑
-        const imageLoadBtn = $("#app-core-image-generator #image-load-btn");
+        // const imageLoadBtn = $("#app-core-image-generator #image-load-btn");
         
-        imageLoadBtn.onclick = () => {
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            fileInput.multiple = true;
+        // imageLoadBtn.onclick = () => {
+        //     const fileInput = document.createElement('input');
+        //     fileInput.type = 'file';
+        //     fileInput.accept = 'image/*';
+        //     fileInput.multiple = true;
     
-            fileInput.onchange = (event) => {
-                const files = event.target.files;
-                for (const file of files) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.classList.add('uploaded-image');
-                        $("#app-core-image-viewer").appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
+        //     fileInput.onchange = (event) => {
+        //         const files = event.target.files;
+        //         for (const file of files) {
+        //             const reader = new FileReader();
+        //             reader.onload = (e) => {
+        //                 const img = document.createElement('img');
+        //                 img.src = e.target.result;
+        //                 img.classList.add('uploaded-image');
+        //                 $("#app-core-image-viewer").appendChild(img);
+        //             };
+        //             reader.readAsDataURL(file);
+        //         }
+        //     };
 
-            fileInput.click();
-        }
+        //     fileInput.click();
+        // }
 
         generateButton.onclick = () => {
 
             //获取完整数据
             const modelSelect = $("#app-core-image-generator #model-select");
             const textField = $("#app-core-image-generator #prompt");
+            const textField2 = $("#app-core-image-generator #prompt2");
+
             const sizeSelect = $("#app-core-image-generator #size-select");
             const steps = $("#app-core-image-generator #setps-slider");
             const batchSize = $("#app-core-image-generator #batch-size");
@@ -716,13 +833,17 @@ const loadApp = () => {
 
             let model = modelSelect.value;
             let prompt = textField.value;
+            let prompt2 = textField2.value;
+
             let size = sizeSelect.value;
             let stepsValue = steps.value;
             let sizeValue = size.split('x');
+
             if (size === 'custom') {
-            sizeValue[0] = $("#width-num").value;
-            sizeValue[1] = $("#height-num").value;
+                sizeValue[0] = $("#width-num").value;
+                sizeValue[1] = $("#height-num").value;
             }
+            
             let batchSizeValue = batchSize.value;
             let batchSizeAValue = batchSizeA.value;
 
@@ -731,113 +852,74 @@ const loadApp = () => {
 
             for (let i = 0; i < batchSizeAValue; i++) {
             //创造向api请求的json, 由于使用的是 comfyUI，需要构造工作流
+
             const data = {
                 "6": {
-                "inputs": {
-                "text": prompt,
-                "clip": [
-                "30",
-                1
-                ]
-                },
-                "class_type": "CLIPTextEncode",
-                "_meta": {
-                "title": "提示词"
-                }
+                    "inputs": {
+                        "text": prompt,
+                        "clip": ["30", 1]
+                    },
+                    "class_type": "CLIPTextEncode",
+                    "_meta": { "title": "提示词" }
                 },
                 "8": {
-                "inputs": {
-                "samples": [
-                "31",
-                0
-                ],
-                "vae": [
-                "30",
-                2
-                ]
-                },
-                "class_type": "VAEDecode",
-                "_meta": {
-                "title": "VAE解码"
-                }
+                    "inputs": {
+                        "samples": ["31", 0],
+                        "vae": ["30", 2]
+                    },
+                    "class_type": "VAEDecode",
+                    "_meta": { "title": "VAE解码" }
                 },
                 "9": {
-                "inputs": {
-                "filename_prefix": "ComfyUI",
-                "images": [
-                "8",
-                0
-                ]
-                },
-                "class_type": "SaveImage",
-                "_meta": {
-                "title": "保存图像"
-                }
+                    "inputs": {
+                        "filename_prefix": "ComfyUI",
+                        "images": ["8", 0]
+                    },
+                    "class_type": "SaveImage",
+                    "_meta": { "title": "保存图像" }
                 },
                 "27": {
-                "inputs": {
-                "width": sizeValue[0],
-                "height": sizeValue[1],
-                "batch_size": batchSizeValue
-                },
-                "class_type": "EmptySD3LatentImage",
-                "_meta": {
-                "title": "创建一个画布"
-                }
+                    "inputs": {
+                        "width": sizeValue[0],
+                        "height": sizeValue[1],
+                        "batch_size": batchSizeValue
+                    },
+                    "class_type": "EmptySD3LatentImage",
+                    "_meta": { "title": "创建一个画布" }
                 },
                 "30": {
-                "inputs": {
-                "ckpt_name": model
-                },
-                "class_type": "CheckpointLoaderSimple",
-                "_meta": {
-                "title": "载入模型"
-                }
+                    "inputs": {
+                        "ckpt_name": model
+                    },
+                    "class_type": "CheckpointLoaderSimple",
+                    "_meta": { "title": "载入模型" }
                 },
                 "31": {
-                "inputs": {
-                "seed": Math.floor(Math.random() * Math.pow(2, 64)),
-                "steps": stepsValue,
-                "cfg": model.includes('flux') ? 1 : 8,
-                "sampler_name": "euler",
-                "scheduler": model.includes('flux') ? "simple" : "normal",
-                "denoise": 1,
-                "model": [
-                "30",
-                0
-                ],
-                "positive": [
-                "6",
-                0
-                ],
-                "negative": [
-                "33",
-                0
-                ],
-                "latent_image": [
-                "27",
-                0
-                ]
-                },
-                "class_type": "KSampler",
-                "_meta": {
-                "title": "生成"
-                }
+                    "inputs": {
+                        "seed": Math.floor(Math.random() * Math.pow(2, 64)),
+                        "steps": stepsValue,
+                        "cfg": model.includes('flux') ? 1 : 8,
+                        "sampler_name": "euler",
+                        "scheduler": model.includes('flux') ? "simple" : "normal",
+                        "denoise": 1,
+                        "model": ["30", 0],
+                        "positive": ["6", 0],
+                        "negative": ["33", 0],
+                        "latent_image": ["27", 0]
+                    },
+                    "class_type": "KSampler",
+                    "_meta": { "title": "生成" }
                 },
                 "33": {
-                "inputs": {
-                "text": "",
-                "clip": [
-                "30",
-                1
-                ]
-                },
-                "class_type": "CLIPTextEncode",
-                "_meta": {
-                "title": "负面提示*"
+                    "inputs": {
+                        "text": prompt2,
+                        "clip": ["30", 1]
+                    },
+                    "class_type": "CLIPTextEncode",
+                    "_meta": { "title": "负面提示*" }
                 }
-                }
-            };
+            }
+            
 
             fetch(`http://127.0.0.1:${port}/prompt`, {
                 method: 'POST',
@@ -974,10 +1056,10 @@ const loadApp = () => {
     //git下载
     let gitSwitch = $("#git-switch");
     if (fs.existsSync(gitPath)) {
-        gitSwitch.selected = true
+        gitSwitch.checked = true
         gitSwitch.disabled = true;
     } else {
-        gitSwitch.selected = false
+        gitSwitch.checked = false
     }
 
     gitSwitch.onclick = () => {
@@ -1068,17 +1150,17 @@ const loadApp = () => {
     let comfyuiManagerSwitch = $("#comfyui-manager-switch");
 
     if (fs.existsSync(path.join(customNodesPath, './ComfyUI-Manager'))) {
-        comfyuiManagerSwitch.selected = true
+        comfyuiManagerSwitch.checked = true
         comfyuiManagerSwitch.disabled = true;
     } else {
-        comfyuiManagerSwitch.selected = false
+        comfyuiManagerSwitch.checked = false
     }
 
     comfyuiManagerSwitch.onclick = () => {
         installNode('https://github.com/ltdrdata/ComfyUI-Manager.git', (e) => {
-            comfyuiManagerSwitch.selected = e;
+            comfyuiManagerSwitch.checked = e;
 
-            if(comfyuiManagerSwitch.selected = false) {
+            if(comfyuiManagerSwitch.checked = false) {
                 openDialog('error', '下载失败', '下载 ComfyUI Manager 过程中发生错误。');
             } else {
                 comfyuiManagerSwitch.disabled = true;
@@ -1091,17 +1173,17 @@ const loadApp = () => {
     let comfyuiGgufSwitch = $("#comfyui-gguf-switch");
 
     if (fs.existsSync(path.join(customNodesPath, './ComfyUI-GGUF'))) {
-        comfyuiGgufSwitch.selected = true
+        comfyuiGgufSwitch.checked = true
         comfyuiGgufSwitch.disabled = true;
     } else {
-        comfyuiGgufSwitch.selected = false
+        comfyuiGgufSwitch.checked = false
     }
 
     comfyuiGgufSwitch.onclick = () => {
         installNode('https://github.com/city96/ComfyUI-GGUF', (e) => {
-            comfyuiGgufSwitch.selected = e;
+            comfyuiGgufSwitch.checked = e;
 
-            if(comfyuiGgufSwitch.selected = false) {
+            if(comfyuiGgufSwitch.checked = false) {
                 openDialog('error', '下载失败', '下载 ComfyUI Manager 过程中发生错误。');
             } else {
                 comfyuiGgufSwitch.disabled = true;
@@ -1114,20 +1196,28 @@ const loadApp = () => {
 
 const openDialog = (icon, headline, content) => {
     const uuid = `dialog-${crypto.randomUUID()}`;
-    const dialog = document.createElement('md-dialog');
-    dialog.setAttribute('type', 'alert');
-    dialog.setAttribute('id', uuid);
+    const dialog = document.createElement('mdui-dialog');
+    dialog.setAttribute('class', uuid);
+    dialog.icon = icon;
+
     dialog.innerHTML = `
-        <div slot="headline"><md-icon>${icon}</md-icon>${headline}</div>
-        <form slot="content" id="form-${uuid}" method="dialog">
-            ${content}
-        </form>
-        <div slot="actions">
-            <md-text-button form="form-${uuid}" value="ok">确定</md-text-button>
+        <div slot="headline">
+            ${headline}
         </div>
+        ${content}
+        <mdui-button slot="action" variant="tonal" id="confirm-${uuid}">确定</mdui-button>
     `;
+    
+    dialog.closeOnOverlayClick = false;
+
     document.body.appendChild(dialog);
-    dialog.show();
+    dialog.open = true;
+
+    dialog.querySelector(`#confirm-${uuid}`).addEventListener('click', () => {
+        dialog.open = false;
+        document.body.removeChild(dialog);
+    });
+
     dialog.addEventListener('close', () => {
         document.body.removeChild(dialog);
     });
@@ -1135,36 +1225,37 @@ const openDialog = (icon, headline, content) => {
 
 const downloadModel = (files) => {
     const uuid = `dialog-${crypto.randomUUID()}`;
-    const dialog_d = document.createElement('md-dialog');
-    dialog_d.setAttribute('type', 'alert');
+    const dialog_d = document.createElement('mdui-dialog');
     dialog_d.setAttribute('id', uuid);
+    dialog_d.icon = "cloud_download";
     dialog_d.innerHTML = `
-        <div slot="headline"><md-icon>cloud_download</md-icon>下载中</div>
-        <form slot="content" id="form-${uuid}" method="dialog">
-            <div id="progress-container-${uuid}"></div>
-        </form>
-        <div slot="actions">
-            <md-text-button form="form-${uuid}" value="cancel">取消</md-text-button>
-        </div>
+        <div slot="headline">下载中</div>
+        <div id="progress-container-${uuid}"></div>
+        <mdui-button slot="action" variant="text" id="cancel-${uuid}">取消</mdui-button>
+        <mdui-button slot="action" variant="tonal" id="done-${uuid}" style="display: none;">完成</mdui-button>
     `;
+
     document.body.appendChild(dialog_d);
-    dialog_d.show();
+    dialog_d.open = true;
+    dialog_d.closeOnOverlayClick = false;
 
     const progressContainer = dialog_d.querySelector(`#progress-container-${uuid}`);
-
-    const updateDialogToComplete = () => {
-        dialog_d.querySelector('div[slot="headline"]').innerHTML = '<md-icon>cloud_done</md-icon>已完成下载';
-        dialog_d.querySelector('md-text-button').textContent = '完成';
-    };
+    const cancelButton = dialog_d.querySelector(`#cancel-${uuid}`);
+    const doneButton = dialog_d.querySelector(`#done-${uuid}`);
 
     let completedDownloads = 0;
+
+    const updateDialogToComplete = () => {
+        dialog_d.querySelector('div[slot="headline"]').innerHTML = '<mdui-icon>cloud_done</mdui-icon> 已完成下载';
+        cancelButton.style.display = 'none';
+        doneButton.style.display = 'inline-block';
+    };
 
     files.forEach(file => {
         const [folderPath, url] = file;
         const fileName = url.split('/').pop();
         const fullFolderPath = path.join(modelPath, folderPath);
         const filePath = path.join(fullFolderPath, fileName);
-
         const fileUuid = `progress-${crypto.randomUUID()}`;
 
         if (!fs.existsSync(fullFolderPath)) {
@@ -1179,7 +1270,7 @@ const downloadModel = (files) => {
         progressItem.className = 'progress-item';
         progressItem.innerHTML = `
             <p>${folderPath}/${fileName}</p>
-            <md-linear-progress id="${fileUuid}" value="0" max="100"></md-linear-progress>
+            <mdui-linear-progress id="${fileUuid}" value="0" max="100"></mdui-linear-progress>
             <p id="${fileUuid}-text"></p>
         `;
         progressContainer.appendChild(progressItem);
@@ -1193,46 +1284,50 @@ const downloadModel = (files) => {
 
         xhr.onprogress = (event) => {
             if (event.lengthComputable) {
-                const totalLength = event.total;
-                const receivedBytes = event.loaded;
-                const progress = (receivedBytes / totalLength) * 100;
+                const progress = (event.loaded / event.total) * 100;
                 progressBar.value = progress;
-                progressText.textContent = `${progress.toFixed()}% [${(receivedBytes / 1024 / 1024).toFixed()} MB / ${(totalLength / 1024 / 1024).toFixed()} MB]`;
+                progressText.textContent = `${progress.toFixed()}% [${(event.loaded / 1024 / 1024).toFixed(2)} MB / ${(event.total / 1024 / 1024).toFixed(2)} MB]`;
             }
         };
 
         xhr.onload = () => {
             if (xhr.status === 200) {
-                const buffer = xhr.response;
+                const buffer = Buffer.from(xhr.response);
 
-                fs.writeFile(filePath, Buffer.from(buffer), (err) => {
+                fs.writeFile(filePath, buffer, (err) => {
                     if (err) {
                         console.error(err);
-                        openDialog('error', '下载失败', '保存文件时发生错误。');
+                        progressText.textContent = '❌ 保存失败';
                         return;
                     }
 
                     completedDownloads++;
+                    progressText.textContent += ' ✅';
+
                     if (completedDownloads === files.length) {
                         updateDialogToComplete();
                     }
                 });
             } else {
-                openDialog('error', '下载失败', `下载文件 ${fileName} 过程中发生错误。`);
+                progressText.textContent = '❌ 下载失败';
             }
         };
 
         xhr.onerror = () => {
-            openDialog('error', '下载失败', `文件 ${fileName} 下载过程中发生网络错误。`);
+            progressText.textContent = '❌ 网络错误';
         };
 
-        dialog_d.addEventListener('close', () => {
-            if (dialog_d.returnValue === 'cancel') {
-                xhr.abort();
-            }
+        cancelButton.addEventListener('click', () => {
+            xhr.abort();
+            document.body.removeChild(dialog_d);
+        });
+
+        doneButton.addEventListener('click', () => {
+            document.body.removeChild(dialog_d);
         });
 
         xhr.send();
     });
 };
+
 

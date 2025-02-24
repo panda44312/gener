@@ -6,6 +6,8 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 700,
+    minWidth: 700,
+    minHeight: 500,
     frame: false,
     icon: path.join(__dirname, 'app-icon', 'app-256.png'), // 设置窗口图标
     webPreferences: {
@@ -44,7 +46,5 @@ function createWindow() {
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  //运行exec 结束python进程
-  exec('taskkill /f /im python.exe');
   app.quit();
 });
